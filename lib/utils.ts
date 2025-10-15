@@ -1,1 +1,6 @@
-//here we define general utility functions that can be used across the application, such as formatting dates, manipulating strings, or handling common calculations.
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
