@@ -1,0 +1,1 @@
+// In this file we can define types related to the home feature, such as props for components or state types.

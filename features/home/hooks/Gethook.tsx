@@ -1,0 +1,1 @@
+//In this directory we can define hooks related to the home feature, such as custom hooks for fetching data or managing state and preferrably if its fetching name it Get + name of the function

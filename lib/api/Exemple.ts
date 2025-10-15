@@ -1,0 +1,2 @@
+//Here we Integrate the backend API callsand export the functions to be used in the frontend
+//We use different files for different Categories of API calls like Auth, Product, Order, etc. Each file contains functions related to that specific category.
