@@ -5,3 +5,5 @@
 export { Button } from './button';
 export { CustomButton } from './custom-button';
 export { Input } from './input';
+export { StatusBadge, type StatusBadgeProps } from './status-badge';
+export { NumberInput, type NumberInputProps } from './number-input';
