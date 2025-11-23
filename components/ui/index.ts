@@ -12,3 +12,4 @@ export { NavigationButton, type NavigationButtonProps } from './navigation-butto
 export { NavigationButtons, type NavigationButtonsProps } from './navigation-buttons';
 export { NavBar, type NavBarProps } from './navbar';
 export { Footer, type FooterProps, type FooterLink, type FooterSection } from './footer';
+export { FavoritesToolbar } from './favorites-toolbar';

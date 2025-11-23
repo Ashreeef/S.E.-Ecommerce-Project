@@ -15,8 +15,8 @@ export interface ProductCardProps {
     price: number;
     originalPrice?: number;
     rating: number;
-    isFavorite?: boolean;
   };
+  isFavorite?: boolean;
   onFavoriteToggle?: (id: string) => void;
   onAddToCart?: (id: string) => void;
   className?: string;
@@ -24,7 +24,7 @@ export interface ProductCardProps {
 
 const productCardVariants = cva(
   [
-    "bg-white flex flex-col rounded-lg overflow-hidden",
+    "bg-white flex flex-col overflow-hidden",
     "transition-all duration-300",
     "focus-within:ring-2 focus-within:ring-offset-2",
     "group"
@@ -44,6 +44,7 @@ const productCardVariants = cva(
 
 const ProductCard: React.FC<ProductCardProps> = ({
   product,
+  isFavorite = false,
   onFavoriteToggle,
   onAddToCart,
   className,
@@ -173,12 +174,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
             "transition-all duration-200 cursor-pointer z-10",
             favoriteAnimation && "animate-ping"
           )}
-          aria-label={product.isFavorite ? "Remove from favorites" : "Add to favorites"}
+          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
           <Heart
             className={cn(
               "w-5 h-5 sm:w-6 sm:h-6 transition-all duration-200",
-              product.isFavorite
+              isFavorite
                 ? "text-red-500 fill-red-500"
                 : "text-neutral-400 hover:text-red-400",
               favoriteAnimation && "scale-125"
