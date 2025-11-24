@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+.dashboard-container {
+  @apply space-y-6;
+}
+
+.dashboard-header {
+  @apply w-full;
+}
+
+.dashboard-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.dashboard-subtitle {
+  @apply text-gray-600;
+}
+
+.stats-grid {
+  @apply grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4;
+}
+
+.stat-card {
+  @apply rounded-lg bg-white p-6 shadow-sm;
+}
+
+.stat-label {
+  @apply text-sm font-medium text-gray-600;
+}
+
+.stat-value {
+  @apply mt-2 text-3xl font-bold text-gray-900;
+}
+
+.page-container {
+  @apply space-y-6;
+}
+
+.page-header {
+  @apply w-full;
+}
+
+.page-title {
+  @apply text-2xl font-bold text-gray-900;
+}
+
+.page-subtitle {
+  @apply text-gray-600;
+}
+
+.page-content {
+  @apply rounded-lg bg-white p-6 shadow-sm;
+}
+
+.page-content-text {
+  @apply text-gray-600;
+}
+

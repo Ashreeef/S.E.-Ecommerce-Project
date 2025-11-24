@@ -86,7 +86,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     // Sync internal value with prop
     useEffect(() => {
-      setInternalValue(value);
+      if (value !== undefined && value !== internalValue) {
+        setInternalValue(value);
+      }
     }, [value]);
     
     const getInputBorderStyles = () => {
@@ -298,6 +300,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               'max-h-60 overflow-y-auto shadow-lg'
             )}
             role="listbox"
+            onClick={(e) => e.stopPropagation()}
           >
             {options.length > 0 ? (
               options.map((option, index) => (

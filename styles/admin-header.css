@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+.admin-header {
+  @apply flex h-16 items-center justify-between border-b border-gray-200 bg-white px-4 md:px-6;
+}
+
+.header-left {
+  @apply flex items-center gap-4;
+}
+
+.header-menu-button {
+  @apply lg:hidden;
+}
+
+.header-menu-icon {
+  @apply h-6 w-6 text-gray-600;
+}
+
+.header-title {
+  @apply text-lg font-semibold text-gray-900;
+}
+
+.search-container {
+  @apply hidden flex-1 items-center justify-center px-4 md:flex;
+}
+
+.search-container-mobile {
+  @apply flex flex-1 items-center justify-center px-2 md:hidden;
+}
+
+.search-wrapper {
+  @apply relative w-full max-w-md;
+}
+
+.search-wrapper-mobile {
+  @apply relative w-full;
+}
+
+.search-input {
+  @apply w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-10 pr-10 text-sm focus:outline-none focus:ring-2;
+  border-color: var(--neutral-300);
+  --tw-ring-color: var(--main-main); 
+}
+
+.search-input-mobile {
+  @apply w-full rounded-lg border border-gray-300 bg-gray-50 py-2 pl-8 pr-8 text-sm focus:outline-none focus:ring-2;
+  border-color: var(--neutral-300);
+  --tw-ring-color: var(--main-main); 
+}
+
+.search-icon {
+  @apply absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400;
+}
+
+.search-close-button {
+  @apply absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600;
+}
+
+.search-close-button-mobile {
+  @apply absolute right-2 top-1/2 -translate-y-1/2 text-gray-400;
+}
+
+.search-close-icon {
+  @apply h-5 w-5;
+}
+
+.search-close-icon-mobile {
+  @apply h-4 w-4;
+}
+
+.header-right {
+  @apply flex items-center gap-3;
+}
+
+.notification-button {
+  @apply relative text-gray-600 hover:text-gray-900;
+}
+
+.notification-icon {
+  @apply h-6 w-6;
+}
+
+.profile-avatar {
+  @apply h-10 w-10 rounded-full flex items-center justify-center text-white font-semibold;
+  background-color: var(--main-300);
+}

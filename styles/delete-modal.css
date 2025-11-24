@@ -1,0 +1,80 @@
+@import "tailwindcss";
+
+/* Modal Backdrop */
+.delete-modal-backdrop {
+  @apply fixed inset-0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+}
+
+/* Modal Container */
+.delete-modal-container {
+  @apply fixed inset-0 flex items-center justify-center p-4;
+  z-index: 9999;
+}
+
+.delete-modal-content {
+  @apply bg-white rounded-lg shadow-xl max-w-md w-full p-6 sm:p-8 relative;
+}
+
+/* Close Button */
+.delete-modal-close {
+  @apply absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 transition-colors;
+}
+
+/* Icon */
+.delete-modal-icon {
+  @apply flex justify-center mb-4;
+}
+
+.delete-modal-icon svg {
+  fill: none;
+  stroke: var(--error-300);
+}
+
+/* Title */
+.delete-modal-title {
+  @apply text-xl sm:text-2xl font-bold text-gray-900 text-center mb-2;
+}
+
+/* Message */
+.delete-modal-message {
+  @apply text-sm sm:text-base text-gray-600 text-center mb-6;
+}
+
+/* Actions */
+.delete-modal-actions {
+  @apply flex flex-col sm:flex-row gap-3 sm:gap-4;
+}
+
+.delete-modal-button-return {
+  @apply flex-1 border-gray-300 text-gray-700 hover:bg-gray-50;
+}
+
+.delete-modal-button-delete {
+  @apply flex-1 text-white flex items-center justify-center gap-2;
+  background-color: var(--error-300);
+}
+
+
+/* Mobile: Dropdown style */
+@media (max-width: 640px) {
+  .delete-modal-container {
+    @apply items-end;
+  }
+
+  .delete-modal-content {
+    @apply rounded-t-lg rounded-b-none max-w-full w-full mb-0;
+    animation: slideUp 0.3s ease-out;
+  }
+
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+}
+

@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+.admin-layout {
+  @apply flex h-screen bg-gray-50;
+}
+
+.admin-main {
+  @apply flex flex-1 flex-col overflow-hidden;
+}
+
+.admin-content {
+  @apply flex-1 overflow-y-auto bg-gray-50 p-4 md:p-6;
+}
+
