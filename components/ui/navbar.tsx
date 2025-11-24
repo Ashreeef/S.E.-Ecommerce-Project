@@ -87,7 +87,7 @@ const NavBar: React.FC<NavBarProps> = ({
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      onSearch?.(searchQuery);
+      router.push(`/search?q=${encodeURIComponent(searchQuery)}`);
       setSearchOpen(false);
       setSearchQuery('');
     }

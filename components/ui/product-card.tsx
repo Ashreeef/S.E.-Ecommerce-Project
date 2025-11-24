@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { Heart, Star, ShoppingCart } from 'lucide-react';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
@@ -124,10 +125,11 @@ const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <article
+    <Link
+      href={`/products/${product.id}`}
       className={cn(
         productCardVariants({ hover: isHovered }),
-        "gap-2 sm:gap-3",
+        "gap-2 sm:gap-3 block",
         className
       )}
       onMouseEnter={() => setIsHovered(true)}
@@ -240,7 +242,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           )}
         </div>
       </div>
-    </article>
+    </Link>
   );
 };
 

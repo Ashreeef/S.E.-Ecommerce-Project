@@ -6,6 +6,7 @@ export interface Product {
     image: string;
     category: string;
     size: string[];
+    colors?: string[];
     description: string;
     availability: boolean;
     rating: number;
@@ -20,6 +21,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Jeans',
         size: ['S', 'M', 'L', 'XL'],
+        colors: ['Blue', 'Black', 'Gray'],
         description: 'Classic denim baggy jeans with a comfortable fit.',
         availability: true,
         rating: 4.5,
@@ -31,6 +33,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Shirts',
         size: ['M', 'L', 'XL'],
+        colors: ['Red', 'White', 'Navy'],
         description: 'Vibrant red polo shirt made from breathable cotton.',
         availability: true,
         rating: 4.2,
@@ -43,6 +46,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Shirts',
         size: ['S', 'M', 'L'],
+        colors: ['Beige', 'White', 'Gray'],
         description: 'Relaxed fit beige shirt, perfect for casual outings.',
         availability: true,
         rating: 4.7,
@@ -54,6 +58,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Shirts',
         size: ['M', 'L', 'XL', 'XXL'],
+        colors: ['Blue', 'White', 'Navy'],
         description: 'Cool and airy blue linen shirt for summer days.',
         availability: true,
         rating: 4.4,
@@ -66,6 +71,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Shirts',
         size: ['S', 'M', 'L', 'XL'],
+        colors: ['White', 'Beige', 'Blue'],
         description: 'Classic white linen shirt, a wardrobe essential.',
         availability: true,
         rating: 4.6,
@@ -77,6 +83,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Polos',
         size: ['M', 'L'],
+        colors: ['Beige', 'Brown', 'Gray'],
         description: 'Textured beige knitted polo for a sophisticated look.',
         availability: true,
         rating: 4.8,
@@ -88,6 +95,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Shirts',
         size: ['S', 'M', 'L'],
+        colors: ['White', 'Black', 'Gray'],
         description: 'Crisp white short sleeve shirt for a clean style.',
         availability: true,
         rating: 4.3,
@@ -100,6 +108,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Jackets',
         size: ['M', 'L', 'XL'],
+        colors: ['Brown', 'Black', 'Navy'],
         description: 'Stylish brown zip jacket for cooler evenings.',
         availability: true,
         rating: 4.9,
@@ -111,6 +120,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Jackets',
         size: ['S', 'M', 'L', 'XL'],
+        colors: ['Beige', 'Brown', 'Black'],
         description: 'Versatile beige trucker jacket that goes with everything.',
         availability: true,
         rating: 4.5,
@@ -122,6 +132,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Trousers',
         size: ['30', '32', '34', '36'],
+        colors: ['Black', 'Navy', 'Gray'],
         description: 'Formal black trousers for office or events.',
         availability: true,
         rating: 4.4,
@@ -133,6 +144,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Shirts',
         size: ['M', 'L', 'XL'],
+        colors: ['Brown', 'Beige', 'White'],
         description: 'Casual brown short sleeve shirt.',
         availability: true,
         rating: 4.1,
@@ -145,6 +157,7 @@ export const mockProducts: Product[] = [
         image: '/assets/product.png',
         category: 'Sweaters',
         size: ['M', 'L', 'XL'],
+        colors: ['Navy', 'Black', 'Gray'],
         description: 'Cozy navy zip sweater for layering.',
         availability: true,
         rating: 4.7,
