@@ -198,7 +198,7 @@ export default function ProductsPage() {
                     <div><strong>Price</strong>: {(product.price ?? 0).toFixed(2)} DZD</div>
                     <div><strong>Date</strong>: {product.date}</div>
                     <div className="col-span-2">
-                      <StatusBadge state={(product.status ?? '').toString().toLowerCase() as any} />
+                      <StatusBadge state={((product.status ?? '') as string).toLowerCase() as 'available' | 'out-of-stock' | 'pending'} />
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
@@ -267,7 +267,7 @@ export default function ProductsPage() {
                   <td className="products-table-cell">{(product.price ?? 0).toFixed(2)} DZD</td>
                   <td className="products-table-cell">{product.date}</td>
                   <td className="products-table-cell">
-                    <StatusBadge state={(product.status ?? '').toString().toLowerCase() as any} />
+                    <StatusBadge state={((product.status ?? '') as string).toLowerCase() as 'available' | 'out-of-stock' | 'pending'} />
                   </td>
                   <td className="products-table-cell products-actions-cell">
                     <button

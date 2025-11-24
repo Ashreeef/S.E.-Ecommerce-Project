@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { CustomButton } from '@/components/ui/custom-button';
 import { Input } from '@/components/ui/input';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { Plus, ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/orders-list.css';
 import { orders } from '@/lib/types/orders';
@@ -63,8 +63,8 @@ export default function OrdersPage() {
   );
 
   // Map OrderStatus to BadgeState
-  const mapStatusToBadge = (status: string): any => {
-    const statusMap: Record<string, string> = {
+  const mapStatusToBadge = (status: string): 'delivered' | 'confirmed' | 'returned' | 'cancelled' | 'pending' | 'sent' => {
+    const statusMap: Record<string, 'delivered' | 'confirmed' | 'returned' | 'cancelled' | 'pending' | 'sent'> = {
       'Delivered': 'delivered',
       'Confirmed': 'confirmed',
       'Returned': 'returned',

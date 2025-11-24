@@ -75,7 +75,7 @@ export default function EditProductPage() {
     color: product.color || '',
     gender: product.gender || 'UNISEX',
     category: product.category || '',
-    fit: (product as any).fit || '',
+    fit: (product.category as string | undefined) || '',
     basePrice: product.originalPrice || product.price,
     stock: product.stock || 0,
     discount: product.discount || 0,
