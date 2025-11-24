@@ -20,12 +20,7 @@ export default function ComponentsShowcasePage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <NavBar 
-        cartItemCount={quantity}
-        onSearch={(query) => console.log('Search:', query)}
-        onWishlist={() => console.log('Wishlist')}
-        onCart={() => console.log('Cart')}
-      />
+      <NavBar />
       
       <div className="py-8 px-4 sm:py-12 sm:px-6">
         <div className="max-w-5xl mx-auto space-y-8">

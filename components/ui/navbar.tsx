@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Menu, X, Search, Heart, ShoppingCart } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export interface NavBarProps {
   logo?: string;
@@ -14,8 +15,6 @@ export interface NavBarProps {
   promoText?: string;
   cartItemCount?: number;
   onSearch?: (query: string) => void;
-  onWishlist?: () => void;
-  onCart?: () => void;
   className?: string;
 }
 
@@ -50,10 +49,9 @@ const NavBar: React.FC<NavBarProps> = ({
   promoText = "25% off for your first purchase - Back to school season",
   cartItemCount = 0,
   onSearch,
-  onWishlist,
-  onCart,
   className,
 }) => {
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -160,7 +158,7 @@ const NavBar: React.FC<NavBarProps> = ({
               </div>
 
               <button
-                onClick={onWishlist}
+                onClick={() => router.push('/favorites')}
                 className="p-2 text-slate-600 hover:text-slate-900 rounded-md transition-colors cursor-pointer"
                 aria-label="Wishlist"
               >
@@ -168,7 +166,7 @@ const NavBar: React.FC<NavBarProps> = ({
               </button>
 
               <button
-                onClick={onCart}
+                onClick={() => router.push('/cart')}
                 className="relative p-2 text-slate-600 hover:text-slate-900 rounded-md transition-colors cursor-pointer"
                 aria-label="Shopping cart"
               >
@@ -230,7 +228,7 @@ const NavBar: React.FC<NavBarProps> = ({
             </button>
 
             <button
-              onClick={onCart}
+              onClick={() => router.push('/cart')}
               className="relative p-2 text-slate-600 hover:text-slate-900 cursor-pointer"
               aria-label="Shopping cart"
             >
