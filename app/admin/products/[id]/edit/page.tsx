@@ -5,6 +5,9 @@ import { useParams } from 'next/navigation';
 import ProductForm from '@/features/admin/components/ProductForm';
 import { Product } from '@/lib/types/product';
 
+
+
+
 export default function EditProductPage() {
   const params = useParams();
   const productId = params.id as string;
@@ -57,16 +60,22 @@ export default function EditProductPage() {
   }
 
   // Convert Product to ProductFormData format
+  const mappedStatus = product.status === 'Available'
+    ? 'Available'
+    : product.status === 'Out-of-stock'
+      ? 'Unavailable'
+      : (product.availability ? 'Available' : 'Unavailable');
+
   const initialData = {
-    name: product.title,
+    name: product.name,
     description: product.description,
     modelDetails: product.modelDetails || '',
-    status: product.status || (product.availability ? 'Available' : 'Unavailable'),
-    size: Array.isArray(product.size) ? product.size.join(', ') : product.size || '',
+    status: mappedStatus as 'Available' | 'Unavailable' | 'Draft',
+    size: Array.isArray(product.size) ? product.size.join(', ') : (product.size as string) || '',
     color: product.color || '',
     gender: product.gender || 'UNISEX',
     category: product.category || '',
-    fit: product.fit || '',
+    fit: (product as any).fit || '',
     basePrice: product.originalPrice || product.price,
     stock: product.stock || 0,
     discount: product.discount || 0,

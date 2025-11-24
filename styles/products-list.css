@@ -157,3 +157,38 @@
   }
 }
 
+/* Mobile list cards (used for small screens) */
+.products-mobile-list {
+  @apply space-y-3;
+}
+
+.mobile-product-card {
+  @apply border border-gray-200 rounded-lg bg-white p-3;
+}
+
+.mobile-expand-button {
+  @apply p-2 rounded-full text-gray-600 hover:bg-gray-100 transition-colors;
+}
+
+.mobile-product-details {
+  @apply mt-3 text-sm text-gray-700;
+}
+
+.mobile-product-details .grid {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.mobile-product-details strong {
+  @apply font-medium text-gray-800;
+}
+
+/* Ensure desktop table hides gracefully on very small screens if needed */
+@media (max-width: 640px) {
+  .products-table-container {
+    @apply hidden;
+  }
+  .products-mobile-list {
+    @apply block;
+  }
+}
+

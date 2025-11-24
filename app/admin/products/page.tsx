@@ -3,78 +3,30 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Button } from '@/components/ui/button';
+import { CustomButton } from '@/components/ui/custom-button';
 import { Input } from '@/components/ui/input';
 import { StatusBadge } from '@/components/ui/status-badge';
 import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
-import { Plus, ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus, ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/products-list.css';
+import {products } from '@/lib/types/product';
 
 // Mock product data - in production, this would come from an API
 interface ProductRow {
   id: string;
   name: string;
-  productId: string;
-  gender: string;
-  type: string;
-  qty: number;
-  sales: number;
-  price: number;
-  date: string;
-  status: 'available' | 'out-of-stock';
+  gender?: string;
+  category?: string;
+  stock?: number;
+  sales?: number;
+  price?: number;
+  date?: string;
+  status?: string;
 }
 
-const mockProducts: ProductRow[] = [
-  {
-    id: '1',
-    name: 'Product Name',
-    productId: '#CRE00221',
-    gender: 'Women',
-    type: 'T-shirt',
-    qty: 200,
-    sales: 234,
-    price: 2300.00,
-    date: '12-08-2025',
-    status: 'out-of-stock',
-  },
-  {
-    id: '2',
-    name: 'Product Name',
-    productId: '#CRE00222',
-    gender: 'Men',
-    type: 'Jeans',
-    qty: 150,
-    sales: 120,
-    price: 3500.00,
-    date: '11-08-2025',
-    status: 'available',
-  },
-  {
-    id: '3',
-    name: 'Product Name',
-    productId: '#CRE00223',
-    gender: 'Unisex',
-    type: 'Jacket',
-    qty: 80,
-    sales: 45,
-    price: 5500.00,
-    date: '10-08-2025',
-    status: 'available',
-  },
-  {
-    id: '4',
-    name: 'Product Name',
-    productId: '#CRE00224',
-    gender: 'Women',
-    type: 'Dress',
-    qty: 0,
-    sales: 0,
-    price: 2800.00,
-    date: '09-08-2025',
-    status: 'out-of-stock',
-  },
-];
+// Use products imported from `lib/types/product.ts` as the mock list
+const mockProducts: ProductRow[] = products;
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -86,6 +38,11 @@ export default function ProductsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const productsPerPage = 10;
   const totalPages = Math.ceil(mockProducts.length / productsPerPage);
+  const [expandedRows, setExpandedRows] = useState<string[]>([]);
+
+  const toggleRow = (id: string) => {
+    setExpandedRows(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+  };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -149,7 +106,7 @@ export default function ProductsPage() {
 
   const filteredProducts = mockProducts.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    product.productId.toLowerCase().includes(searchQuery.toLowerCase())
+    product.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const paginatedProducts = filteredProducts.slice(
@@ -182,29 +139,81 @@ export default function ProductsPage() {
           />
         </div>
         <div className="products-toolbar-right">
-          <Button variant="outline" size="sm" className="products-toolbar-button">
-            <ArrowUpDown className="w-4 h-4" />
-            Sort
-          </Button>
-          <Button variant="outline" size="sm" className="products-toolbar-button">
-            <Filter className="w-4 h-4" />
-            Filter
-          </Button>
-          <Button variant="outline" size="sm" className="products-toolbar-button">
-            <Download className="w-4 h-4" />
-            Export
-          </Button>
+          <CustomButton
+            variant="outlined"
+            text="Sort"
+            leftIcon={<ArrowUpDown className="w-4 h-4" />}
+            className="products-toolbar-button"
+          />
+          <CustomButton
+            variant="outlined"
+            text="Filter"
+            leftIcon={<Filter className="w-4 h-4" />}
+            className="products-toolbar-button"
+          />
+          <CustomButton
+            variant="outlined"
+            text="Export"
+            leftIcon={<Download className="w-4 h-4" />}
+            className="products-toolbar-button"
+          />
           <Link href="/admin/products/new">
-            <Button className="products-new-button">
-              <Plus className="w-4 h-4" />
-              New product
-            </Button>
+            <CustomButton
+              text="New product"
+              leftIcon={<Plus className="w-4 h-4" />}
+              className="products-new-button"
+            />
           </Link>
         </div>
       </div>
 
-      {/* Products Table */}
-      <div className="products-table-container">
+      {/* Mobile list (small screens) */}
+      <div className="products-mobile-list sm:hidden">
+        {paginatedProducts.length === 0 ? (
+          <div className="products-table-empty">No products found</div>
+        ) : (
+          paginatedProducts.map((product) => (
+            <div key={product.id} className="mobile-product-card border rounded mb-3 p-3 bg-white">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="font-medium">{product.name}</div>
+                  <div className="text-xs text-neutral-400">{product.id}</div>
+                </div>
+                <button
+                  onClick={() => toggleRow(product.id)}
+                  aria-expanded={expandedRows.includes(product.id)}
+                  className="mobile-expand-button"
+                >
+                  {expandedRows.includes(product.id) ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                </button>
+              </div>
+
+              {expandedRows.includes(product.id) && (
+                <div className="mobile-product-details mt-3 text-sm text-neutral-600">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div><strong>Gender</strong>: {product.gender}</div>
+                    <div><strong>Category</strong>: {product.category}</div>
+                    <div><strong>QTY</strong>: {product.stock ?? 0}</div>
+                    <div><strong>Sales</strong>: {product.sales ?? 0}</div>
+                    <div><strong>Price</strong>: {(product.price ?? 0).toFixed(2)} DZD</div>
+                    <div><strong>Date</strong>: {product.date}</div>
+                    <div className="col-span-2">
+                      <StatusBadge state={(product.status ?? '').toString().toLowerCase() as any} />
+                    </div>
+                  </div>
+                  <div className="flex gap-2 mt-3">
+                    <button onClick={() => handleEdit(product.id)} className="products-action-button"><Pencil className="w-4 h-4" /></button>
+                    <button onClick={() => handleDelete(product.id)} className="products-action-button products-action-button-delete"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Desktop table (small screens hidden) */}
+      <div className="products-table-container hidden sm:block">
         <table className="products-table">
           <thead>
             <tr>
@@ -218,7 +227,7 @@ export default function ProductsPage() {
               </th>
               <th className="products-table-header">Product Name and ID</th>
               <th className="products-table-header">Gender</th>
-              <th className="products-table-header">Type</th>
+              <th className="products-table-header">Category</th>
               <th className="products-table-header">QTY</th>
               <th className="products-table-header">Sales</th>
               <th className="products-table-header">Price</th>
@@ -248,17 +257,17 @@ export default function ProductsPage() {
                   <td className="products-table-cell">
                     <div className="products-name-cell">
                       <span className="products-name">{product.name}</span>
-                      <span className="products-id">{product.productId}</span>
+                      <span className="products-id">{product.id}</span>
                     </div>
                   </td>
                   <td className="products-table-cell">{product.gender}</td>
-                  <td className="products-table-cell">{product.type}</td>
-                  <td className="products-table-cell">{product.qty}</td>
-                  <td className="products-table-cell">{product.sales}</td>
-                  <td className="products-table-cell">{product.price.toFixed(2)} DZD</td>
+                  <td className="products-table-cell">{product.category}</td>
+                  <td className="products-table-cell">{product.stock ?? 0}</td>
+                  <td className="products-table-cell">{product.sales ?? 0}</td>
+                  <td className="products-table-cell">{(product.price ?? 0).toFixed(2)} DZD</td>
                   <td className="products-table-cell">{product.date}</td>
                   <td className="products-table-cell">
-                    <StatusBadge state={product.status} />
+                    <StatusBadge state={(product.status ?? '').toString().toLowerCase() as any} />
                   </td>
                   <td className="products-table-cell products-actions-cell">
                     <button

@@ -2,7 +2,7 @@
 
 import { useEffect } from 'react';
 import { X, Trash2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { CustomButton } from '@/components/ui/custom-button';
 import '@/styles/delete-modal.css';
 
 interface DeleteProductModalProps {
@@ -83,22 +83,21 @@ export default function DeleteProductModal({
 
           {/* Actions */}
           <div className="delete-modal-actions">
-            <Button
-              variant="outline"
+            <CustomButton
+              variant="outlined"
+              text="Return"
               onClick={onClose}
               disabled={isLoading}
               className="delete-modal-button-return"
-            >
-              Return
-            </Button>
-            <Button
+            />
+            <CustomButton
+              text={isLoading ? 'Deleting...' : 'Delete'}
+              leftIcon={<Trash2 className="w-4 h-4" />}
               onClick={onConfirm}
               disabled={isLoading}
+              loading={isLoading}
               className="delete-modal-button-delete"
-            >
-              <Trash2 className="w-4 h-4" />
-              {isLoading ? 'Deleting...' : 'Delete'}
-            </Button>
+            />
           </div>
         </div>
       </div>

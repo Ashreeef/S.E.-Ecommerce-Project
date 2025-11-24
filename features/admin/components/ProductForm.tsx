@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { CustomButton } from '@/components/ui/custom-button';
 import { NumberInput } from '@/components/ui/number-input';
 import { useProductForm } from '@/hooks/useProductForm';
 import { Upload, X, Plus } from 'lucide-react';
@@ -492,21 +492,20 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
 
       {/* Action Buttons */}
       <div className="product-form-actions">
-        <Button
-          variant="outline"
+        <CustomButton
+          variant="outlined"
+          text="Save draft"
           onClick={handleSaveDraft}
           disabled={isLoading}
           className="product-form-button"
-        >
-          Save draft
-        </Button>
-        <Button
+        />
+        <CustomButton
+          text={isEdit ? 'Update product' : 'Add product'}
           onClick={handleSubmit}
+          loading={isLoading}
           disabled={isLoading}
           className="product-form-button product-form-button-primary"
-        >
-          {isLoading ? (isEdit ? 'Updating...' : 'Adding...') : (isEdit ? 'Update product' : 'Add product')}
-        </Button>
+        />
       </div>
     </div>
   );

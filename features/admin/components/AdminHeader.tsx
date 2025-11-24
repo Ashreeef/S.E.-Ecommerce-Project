@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import '@/styles/admin-header.css';
 
+
 interface AdminHeaderProps {
   onMenuClick: () => void;
   onSearch?: (query: string) => void;
@@ -30,7 +31,7 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   return (
     <header className="admin-header">
       <div className="header-left">
-        {/* Hamburger menu for mobile */}
+        {/* menu for mobile */}
         <button
           onClick={onMenuClick}
           className="header-menu-button"
@@ -51,10 +52,8 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
           </svg>
         </button>
 
-        {/* Page title */}
-        <h1 className="header-title">
-          {pageTitle}
-        </h1>
+        
+        
       </div>
 
       {/* Search bar */}
