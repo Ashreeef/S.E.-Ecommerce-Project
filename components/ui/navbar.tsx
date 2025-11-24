@@ -14,7 +14,6 @@ export interface NavBarProps {
   categories?: Array<{ label: string; href: string }>;
   promoText?: string;
   cartItemCount?: number;
-  onSearch?: (query: string) => void;
   className?: string;
 }
 
@@ -48,7 +47,6 @@ const NavBar: React.FC<NavBarProps> = ({
   ],
   promoText = "25% off for your first purchase - Back to school season",
   cartItemCount = 0,
-  onSearch,
   className,
 }) => {
   const router = useRouter();

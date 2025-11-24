@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ProductGrid } from '@/components/ui/product-grid';
 import { ProductsToolbar } from '@/components/ui/products-toolbar';
@@ -9,7 +9,7 @@ import { useFavorites } from '@/hooks/useFavorites';
 import { mockProducts } from '@/lib/mock-data';
 import { SortOption } from '@/components/ui/sort-control';
 
-export default function SearchPage() {
+function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
   
@@ -107,5 +107,17 @@ export default function SearchPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center text-neutral-500">Loading search results...</div>
+      </div>
+    }>
+      <SearchResults />
+    </Suspense>
   );
 }
