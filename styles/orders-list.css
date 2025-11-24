@@ -1,0 +1,181 @@
+@import "tailwindcss";
+
+/* Orders List Container */
+.orders-list-container {
+  @apply space-y-6;
+}
+
+/* Breadcrumb */
+.orders-breadcrumb {
+  @apply mb-4 text-sm text-gray-600;
+}
+
+.orders-breadcrumb-separator {
+  @apply mx-2;
+}
+
+/* Toolbar */
+.orders-toolbar {
+  @apply flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between;
+}
+
+.orders-toolbar-left {
+  @apply flex-1 w-full sm:w-auto;
+}
+
+.orders-search-input {
+  @apply max-w-md;
+}
+
+.orders-toolbar-right {
+  @apply flex flex-wrap gap-2 items-center;
+}
+
+.orders-toolbar-button {
+  @apply flex items-center gap-2;
+}
+
+/* Table Container */
+.orders-table-container {
+  @apply bg-white rounded-lg shadow-sm overflow-hidden;
+}
+
+.orders-table {
+  @apply w-full border-collapse;
+}
+
+.orders-table thead {
+  @apply bg-gray-50;
+}
+
+.orders-table-header {
+  @apply px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider;
+}
+
+.orders-table-checkbox {
+  @apply px-4 py-3 w-12;
+}
+
+.orders-checkbox {
+  @apply w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500;
+}
+
+.orders-table-row {
+  @apply border-b border-gray-200 hover:bg-gray-50 transition-colors;
+}
+
+.orders-table-row:last-child {
+  @apply border-b-0;
+}
+
+.orders-table-cell {
+  @apply px-4 py-3 text-sm text-gray-900;
+}
+
+.orders-name-cell {
+  @apply flex flex-col;
+}
+
+.orders-id {
+  @apply font-medium text-gray-900;
+}
+
+.orders-actions-cell {
+  @apply flex items-center gap-2;
+}
+
+.orders-action-button {
+  @apply p-1.5 rounded hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors;
+}
+
+.orders-action-button-delete {
+  @apply hover:bg-red-50 hover:text-red-600;
+}
+
+.orders-table-empty {
+  @apply px-4 py-8 text-center text-gray-500;
+}
+
+/* Pagination */
+.orders-pagination {
+  @apply flex items-center justify-center gap-2;
+}
+
+.orders-pagination-button {
+  @apply p-2 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+
+.orders-pagination-numbers {
+  @apply flex items-center gap-1;
+}
+
+.orders-pagination-number {
+  @apply px-3 py-1.5 rounded text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors;
+}
+
+.orders-pagination-number-active {
+  @apply bg-gray-900 text-white hover:bg-gray-800;
+}
+
+.orders-pagination-ellipsis {
+  @apply px-2 text-gray-500;
+}
+
+/* Mobile list cards (used for small screens) */
+.orders-mobile-list {
+  @apply space-y-3;
+}
+
+.mobile-order-card {
+  @apply border border-gray-200 rounded-lg bg-white p-3;
+}
+
+.mobile-expand-button {
+  @apply p-2 rounded-full text-gray-600 hover:bg-gray-100 transition-colors;
+}
+
+.mobile-order-details {
+  @apply mt-3 text-sm text-gray-700;
+}
+
+.mobile-order-details .grid {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.mobile-order-details strong {
+  @apply font-medium text-gray-800;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .orders-table-container {
+    @apply overflow-x-auto;
+  }
+
+  .orders-table {
+    @apply min-w-full;
+  }
+
+  .orders-table-header,
+  .orders-table-cell {
+    @apply px-2 py-2 text-xs;
+  }
+
+  .orders-toolbar {
+    @apply flex-col;
+  }
+
+  .orders-toolbar-right {
+    @apply w-full justify-start;
+  }
+}
+
+/* Ensure desktop table hides gracefully on very small screens if needed */
+@media (max-width: 640px) {
+  .orders-table-container {
+    @apply hidden;
+  }
+  .orders-mobile-list {
+    @apply block;
+  }
+}
