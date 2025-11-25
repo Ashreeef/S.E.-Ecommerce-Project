@@ -64,8 +64,8 @@ export default function CartItem({ item, removeItem, updateQuantity }: any) {
             <button
               onClick={() => {
                 updateQuantity(item.id, item.quantity + 1);
-                
               }}
+              disabled={item.quantity >= 10}
               className="px-3 py-2 hover:bg-gray-100 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               +
