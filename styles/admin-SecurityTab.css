@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+/*
+ * styles/admin-SecurityTab.css
+ * This file contains the custom styles for the SecurityTab component.
+ */
+
+/* --- General Layout and Typography --- */
+
+.security-main-title {
+    @apply text-xl font-bold;
+    color: #000000;
+    margin-bottom: 1.5rem; 
+}
+
+.security-label {
+    color: #4a4a4a; 
+}
+
+.security-toggle-title {
+    @apply text-sm font-medium;
+    color: #4a4a4a;
+}
+
+.security-toggle-description {
+    @apply text-xs mt-0.5;
+    color: #888888;
+}
+
+.security-item {
+    @apply py-3;
+}
+
+.security-separator {
+    @apply my-4 border-gray-100;
+}
+
+/* --- Input and Button Layout/Styling --- */
+
+.field-action-container {
+    /* !!! MODIFIED CLASS: Use justify-between to push the button to the far right */
+    /* It now separates its children with as much space as possible. */
+    @apply flex items-end justify-between; /* Changed gap-6 to justify-between */
+    padding-bottom: 2rem;
+}
+
+.security-input-wrapper {
+    /* This wrapper now only contains the label and input. 
+       Its max-width ensures the input box itself has a consistent size. */
+    max-width: 400px; /* Keep the input box length consistent */
+    width: 100%; /* Ensure it takes up to max-width */
+    /* Add a right margin to create the desired space between the input box and the button */
+    margin-right: 2rem; /* Added margin for space between input and button */
+}
+
+.security-input {
+    @apply rounded-md w-full; /* w-full ensures it fills its wrapper's max-width */
+}
+
+.security-action-button {
+    @apply px-4 py-2 text-sm font-medium shadow-sm whitespace-nowrap rounded-full;
+    background-color: white;
+    color: black; 
+    border: 1px solid black; 
+    transition: all 0.2s ease-in-out;
+    /* Ensure the button doesn't stretch and maintains its content-based width */
+    flex-shrink: 0; 
+}
+
+.security-action-button:hover {
+    background-color: #f5f5f5;
+}
+
+/* --- 2FA Toggle Layout --- */
+
+.toggle-container {
+    /* Ensures the toggle is on the far right */
+    @apply flex items-start justify-between;
+}
+
+/* --- Toggle Switch Styles (Reusing Pink/Grey for consistency) --- */
+
+.toggle-switch-label {
+    @apply relative inline-flex items-center cursor-pointer;
+}
+
+.toggle-track {
+    @apply w-10 h-6 rounded-full shadow-inner transition-all duration-300 flex items-center p-0.5;
+}
+
+.toggle-track-off {
+    background-color: #e0e0e0; 
+    justify-content: flex-start;
+}
+
+.toggle-track-on {
+    background-color: #ffd5d7;
+    justify-content: flex-end;
+}
+
+.toggle-thumb {
+    @apply h-5 w-5 rounded-full shadow transition-all duration-300;
+}
+
+.toggle-thumb-off {
+    background-color: #f9f9f9; 
+}
+
+.toggle-thumb-on {
+    background-color: #ff6b81;
+}
