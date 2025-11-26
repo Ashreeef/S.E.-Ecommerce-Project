@@ -11,16 +11,28 @@ interface Category {
 
 const categories: Category[] = [
   {
-    name: 'Skirts',
+    name: 'Chemises',
+    itemCount: 110,
+    image: '/assets/chemise.JPG',
+    color: 'from-blue-100 to-blue-50',
+  },
+  {
+    name: 'Jupes',
     itemCount: 85,
     image: '/assets/jupe.JPG',
     color: 'from-rose-100 to-rose-50',
   },
   {
-    name: 'Dresses',
-    itemCount: 120,
-    image: '/assets/dress.JPG',
+    name: 'Hijeb',
+    itemCount: 45,
+    image: '/assets/hijeb.jpg',
     color: 'from-purple-100 to-purple-50',
+  },
+  {
+    name: 'Ensemble',
+    itemCount: 95,
+    image: '/assets/ensemble.JPG',
+    color: 'from-primary-200 to-primary-100',
   },
   {
     name: 'Jackets',
@@ -29,21 +41,9 @@ const categories: Category[] = [
     color: 'from-pink-100 to-pink-50',
   },
   {
-    name: 'Outfits',
-    itemCount: 95,
-    image: '/assets/outfit.JPG',
-    color: 'from-primary-200 to-primary-100',
-  },
-  {
-    name: 'Shirts',
-    itemCount: 110,
-    image: '/assets/chemise.JPG',
-    color: 'from-blue-100 to-blue-50',
-  },
-  {
-    name: 'Blouses',
-    itemCount: 75,
-    image: '/assets/camisa.JPG',
+    name: 'Robes',
+    itemCount: 120,
+    image: '/assets/robe.JPG',
     color: 'from-green-100 to-green-50',
   },
 ];

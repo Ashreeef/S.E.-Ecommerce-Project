@@ -17,26 +17,26 @@ interface Product {
 const featuredProducts: Product[] = [
   {
     id: '1',
-    name: 'Ensemble Élégant',
+    name: 'Elegant Ensemble',
     price: 4500,
     originalPrice: 6000,
     rating: 4.9,
     reviews: 67,
-    image: '/assets/outfit.JPG',
+    image: '/assets/ensemble.JPG',
     badge: 'Best Seller',
   },
   {
     id: '2',
-    name: 'Robe d\'Été Chic',
+    name: 'Chic Summer Robe',
     price: 3200,
     rating: 4.8,
     reviews: 43,
-    image: '/assets/dress.JPG',
+    image: '/assets/robe.JPG',
     badge: 'New Arrival',
   },
   {
     id: '3',
-    name: 'Veste Moderne',
+    name: 'Modern Jacket',
     price: 3800,
     originalPrice: 5000,
     rating: 4.7,
@@ -45,11 +45,12 @@ const featuredProducts: Product[] = [
   },
   {
     id: '4',
-    name: 'Jupe Classique',
+    name: 'Premium Hijeb',
     price: 2900,
     rating: 4.8,
     reviews: 38,
-    image: '/assets/skirt.JPG',
+    image: '/assets/hijeb.jpg',
+    badge: 'New Arrival',
   },
 ];
 

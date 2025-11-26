@@ -64,7 +64,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onGetStarted }) => {
           <div className="relative">
             <div className="aspect-square bg-gradient-to-br from-rose-100 to-rose-50 rounded-3xl overflow-hidden shadow-2xl">
               <Image
-                src="/assets/jupe.JPG"
+                src="/assets/ensemble.JPG"
                 alt="Tuhfaaa Fashion Collection"
                 width={800}
                 height={800}
