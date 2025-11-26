@@ -12,7 +12,6 @@ import {
   ProductCard,
   NavigationButton,
   NavigationButtons,
-  
 } from "@/components/ui";
 import { ArrowLeft, ArrowRight, Ticket } from "lucide-react";
 
@@ -91,12 +90,7 @@ function cartPage() {
           <div className="lg:col-span-3 space-y-2 p-4 border border-gray-200 rounded-lg">
             {cartItems.length === 0 && " No items in the cart yet. "}
             {cartItems.map((item) => (
-              <CartItem
-                key={item.id}
-                item={item}
-                removeItem={removeItem}
-                updateQuantity={updateQuantity}
-              />
+              <CartItem key={item.id} item={item} removeItem={removeItem} />
             ))}
           </div>
           {/*cart summary*/}
@@ -148,7 +142,11 @@ function cartPage() {
                     <Ticket size={18} />
                   </span>
                 </div>
-                <CustomButton variant="filled" text="Apply" onClick={() => {}} />
+                <CustomButton
+                  variant="filled"
+                  text="Apply"
+                  onClick={() => {}}
+                />
               </div>
             </div>
             <CustomButton

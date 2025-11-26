@@ -45,6 +45,8 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   /** Additional CSS classes */
   className?: string;
   /** Focus event handler */
+  type?: string;
+
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   /** Blur event handler */
   onBlur?: (e: React.FocusEvent<HTMLInputElement>) => void;
@@ -214,8 +216,40 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       }
       return icon;
     };
+     const [cartItems, setCartItems] = React.useState([
+        {
+          id: 1,
+          name: "Denim baggy jeans",
+          size: "XL",
+          color: "Navy blue",
+          price: 3500.0,
+          originalPrice: 4500.0,
+          quantity: 1,
+          image: "",
+        },
+        {
+          id: 2,
+          name: "Denim baggy jeans",
+          size: "XL",
+          color: "Navy blue",
+          price: 3500.0,
+          originalPrice: 4500.0,
+          quantity: 1,
+          image: "",
+        },
+        {
+          id: 5,
+          name: "Denim baggy jeans",
+          size: "XL",
+          color: "Navy blue",
+          price: 3500.0,
+          originalPrice: 4500.0,
+          quantity: 2,
+          image: "",
+        },
+      ]);
 
-    // Render
+    
     return (
       <div 
         ref={containerRef}
@@ -248,7 +282,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {/* Input Field */}
             <input
               ref={ref || inputRef}
-              type="text"
+              type={isListType ? "text" : props.type ?? "text"} /*default =text */
               value={internalValue}
               onChange={isListType ? undefined : handleChange}
               onFocus={handleFocus}
