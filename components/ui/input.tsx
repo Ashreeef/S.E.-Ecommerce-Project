@@ -44,6 +44,8 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   disabled?: boolean;
   /** Additional CSS classes */
   className?: string;
+  /** Input type attribute */
+  type?: string;
   /** Focus event handler */
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   /** Blur event handler */
@@ -215,7 +217,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       return icon;
     };
 
-    // Render
     return (
       <div 
         ref={containerRef}
@@ -248,7 +249,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {/* Input Field */}
             <input
               ref={ref || inputRef}
-              type="text"
+              type={isListType ? "text" : props.type ?? "text"} /*default =text */
               value={internalValue}
               onChange={isListType ? undefined : handleChange}
               onFocus={handleFocus}
