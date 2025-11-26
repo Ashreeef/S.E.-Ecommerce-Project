@@ -11,22 +11,12 @@ import { Plus, ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, Chevr
 import '@/styles/admin-dashboard.css';
 import '@/styles/products-list.css';
 import {products } from '@/lib/types/product';
+import { Product } from '@/lib/types/product';
 
 // Mock product data - in production, this would come from an API
-interface ProductRow {
-  id: string;
-  name: string;
-  gender?: string;
-  category?: string;
-  stock?: number;
-  sales?: number;
-  price?: number;
-  date?: string;
-  status?: string;
-}
 
 // Use products imported from `lib/types/product.ts` as the mock list
-const mockProducts: ProductRow[] = products;
+const mockProducts: Product[] =  products;
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -69,33 +59,6 @@ export default function ProductsPage() {
     setDeleteModalOpen(true);
   };
 
-  const handleConfirmDelete = async () => {
-    if (!productToDelete) return;
-
-    setIsDeleting(true);
-    try {
-      // TODO: Call API to delete product
-      const response = await fetch(`/api/products/${productToDelete}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        // Remove product from list (in production, refetch from API)
-        // For now, just close modal and show success
-        setDeleteModalOpen(false);
-        setProductToDelete(null);
-        // You might want to refresh the products list here
-        alert('Product deleted successfully');
-      } else {
-        alert('Failed to delete product');
-      }
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      alert('An error occurred while deleting the product');
-    } finally {
-      setIsDeleting(false);
-    }
-  };
 
   const handleCloseModal = () => {
     if (!isDeleting) {
@@ -343,10 +306,14 @@ export default function ProductsPage() {
       {productToDelete && (
         <DeleteProductModal
           isOpen={deleteModalOpen}
-          productId={productToDelete}
+          resourceId={productToDelete}
+          resourceType="product"
           onClose={handleCloseModal}
-          onConfirm={handleConfirmDelete}
-          isLoading={isDeleting}
+          onSuccess={() => {
+            setDeleteModalOpen(false);
+            setProductToDelete(null);
+            alert('Product deleted successfully');
+          }}
         />
       )}
     </div>

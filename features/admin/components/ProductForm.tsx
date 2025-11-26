@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { CustomButton } from '@/components/ui/custom-button';
 import { NumberInput } from '@/components/ui/number-input';
-import { useProductForm } from '@/hooks/useProductForm';
+import { useProductForm, ProductFormData } from '@/hooks/useProductForm';
+import { useProduct } from '@/hooks/useProducts';
 import { Upload, X, Plus } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/product-form.css';
+import { Product } from '@/lib/types/product';
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 const COLORS = [
@@ -25,22 +27,7 @@ const DISCOUNT_TYPES = ['Back to school', 'Seasonal', 'Clearance', 'Flash sale',
 
 interface ProductFormProps {
   productId?: string;
-  initialData?: {
-    name?: string;
-    description?: string;
-    modelDetails?: string;
-    status?: 'Available' | 'Unavailable' | 'Draft';
-    size?: string;
-    color?: string;
-    gender?: 'MEN' | 'WOMEN' | 'UNISEX';
-    category?: string;
-    fit?: string;
-    basePrice?: number;
-    stock?: number;
-    discount?: number;
-    discountType?: string;
-    imageUrls?: string[];
-  };
+  initialData?: Partial<ProductFormData>; 
   isEdit?: boolean;
 }
 
@@ -57,37 +44,47 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
     initializeForm,
   } = useProductForm();
 
+  // If productId is provided and no initialData, fetch product to initialize the form
+  const { product: fetchedProduct, isLoading: isProductLoading } = useProduct(productId);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
 
   // Initialize form with product data if editing
   useEffect(() => {
-    if (isEdit && initialData) {
+    if (!isEdit) return;
+
+    // priority: explicit initialData prop, otherwise fetched product
+    const source = initialData ? initialData : (fetchedProduct as Partial<Product> | undefined);
+    if (source) {
       const formDataToSet = {
-        name: initialData.name || '',
-        description: initialData.description || '',
-        modelDetails: initialData.modelDetails || '',
-        status: initialData.status || 'Available',
-        size: initialData.size || '',
-        color: initialData.color || '',
-        gender: initialData.gender || 'UNISEX',
-        category: initialData.category || '',
-        fit: initialData.fit || '',
-        basePrice: initialData.basePrice || 0,
-        stock: initialData.stock || 0,
-        discount: initialData.discount || 0,
-        discountType: initialData.discountType || '',
+        name: (source as any).name || '',
+        description: (source as any).description || '',
+        modelDetails: (source as any).modelDetails || '',
+        availableSizes: Array.isArray((source as any).availableSizes) ? (source as any).availableSizes.join(', ') : ((source as any).availableSizes || ''),
+        isAvailable: (source as any).isAvailable ?? true,
+        price: (source as any).price || 0,
+        originalPrice: (source as any).originalPrice,
+        image: (source as any).image || '',
+        color: (source as any).color || '',
+        gender: (source as any).gender || 'UNISEX',
+        category: (source as any).category || '',
+        fit: (source as any).fit || '',
+        stock: (source as any).stock || 0,
+        discount: (source as any).discount || 0,
+        discountType: (source as any).discountType || '',
         images: [],
-        imageUrls: initialData.imageUrls || [],
+        imageUrls: Array.isArray((source as any).images)
+          ? (source as any).images.map((img: any) => (typeof img === 'string' ? img : img.url))
+          : ((source as any).image ? [(source as any).image] : []),
       };
       initializeForm(formDataToSet);
       // Set image preview URLs from existing images
-      if (initialData.imageUrls && initialData.imageUrls.length > 0) {
-        setImagePreviewUrls(initialData.imageUrls);
-      }
+      const existingUrls = formDataToSet.imageUrls || [];
+      if (existingUrls.length > 0) setImagePreviewUrls(existingUrls);
     }
-  }, [isEdit, initialData, initializeForm]);
+  }, [isEdit, initialData, fetchedProduct, initializeForm]);
 
   // Create preview URLs for uploaded images
   useEffect(() => {
@@ -303,27 +300,13 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
               )}
             </div>
 
-            {/* Product Status */}
+            {/* Available Sizes */}
             <div>
               <Input
-                label="Product status"
-                variant="list"
-                value={formData.status}
-                onChange={(value) => updateField('status', value as any)}
-                options={STATUS_OPTIONS}
-                placeholder="Select status"
-              />
-            </div>
-
-            {/* Size */}
-            <div>
-              <Input
-                label="Size"
-                variant="list"
-                value={formData.size}
-                onChange={(value) => updateField('size', value)}
-                options={SIZES}
-                placeholder="Select size"
+                label="Available Sizes"
+                value={formData.availableSizes}
+                onChange={(value) => updateField('availableSizes', value)}
+                placeholder="Enter sizes separated by comma (e.g., S, M, L, XL)"
               />
             </div>
 
@@ -409,25 +392,25 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
               />
             </div>
 
-            {/* Base Pricing */}
+            {/* Price */}
             <div>
               <label className="product-form-label">
-                Base pricing
+                Price
               </label>
               <div className="product-input-group">
                 <NumberInput
-                  value={formData.basePrice}
-                  onChange={(value) => updateField('basePrice', value)}
+                  value={formData.price}
+                  onChange={(value) => updateField('price', value)}
                   min={0}
                   max={999999}
                   allowDecimals={true}
                   className="flex-1"
-                  error={!!errors.basePrice}
+                  error={!!errors.price}
                 />
                 <span className="product-input-currency">DZD</span>
               </div>
-              {errors.basePrice && (
-                <p className="product-form-error">{errors.basePrice}</p>
+              {errors.price && (
+                <p className="product-form-error">{errors.price}</p>
               )}
             </div>
 

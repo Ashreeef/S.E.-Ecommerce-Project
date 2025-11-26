@@ -10,6 +10,7 @@ import '@/styles/admin-dashboard.css';
 import '@/styles/orders-list.css';
 import { orders } from '@/lib/types/orders';
 import { Order } from '@/lib/types/orders';
+import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
 
 // Use orders imported from `lib/types/orders.ts` as the mock list
 const mockOrders: Order[] = orders;
@@ -19,6 +20,9 @@ export default function OrdersPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const ordersPerPage = 10;
   const totalPages = Math.ceil(mockOrders.length / ordersPerPage);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
@@ -44,16 +48,18 @@ export default function OrdersPage() {
   };
 
   const handleEdit = (orderId: string) => {
-    router.push(`/admin/orders/${orderId}/edit`);
+    // encode order id (e.g. '#CRO00221') so the hash doesn't break the path
+    const safeId = encodeURIComponent(orderId);
+    router.push(`/admin/orders/${safeId}`);
   };
 
   const handleDelete = (orderId: string) => {
-    alert(`Delete order ${orderId}`);
-    // TODO: Implement delete logic
+    setProductToDelete(orderId);
+    setDeleteModalOpen(true);
   };
 
   const filteredOrders = mockOrders.filter(order =>
-    order.userName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     order.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -130,7 +136,7 @@ export default function OrdersPage() {
             <div key={order.id} className="mobile-order-card border rounded mb-3 p-3 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">{order.userName}</div>
+                    <div className="font-medium">{order.customerName}</div>
                   <div className="text-xs text-neutral-400">{order.id}</div>
                 </div>
                 <button
@@ -144,10 +150,10 @@ export default function OrdersPage() {
 
               {expandedRows.includes(order.id) && (
                 <div className="mobile-order-details mt-3 text-sm text-neutral-600">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div><strong>Date</strong>: {order.date}</div>
-                    <div><strong>Total</strong>: {order.total.toFixed(2)} DZD</div>
-                    <div><strong>Items</strong>: {order.items}</div>
+                    <div className="grid grid-cols-2 gap-2">
+                    <div><strong>Date</strong>: {order.datePurchased}</div>
+                    <div><strong>Total</strong>: {order.grandTotal.toFixed(2)} DZD</div>
+                    <div><strong>Items</strong>: {order.numberOfProducts}</div>
                     <div><strong>Address</strong>: {order.address}</div>
                     <div className="col-span-2">
                       <StatusBadge state={mapStatusToBadge(order.status)} />
@@ -210,10 +216,10 @@ export default function OrdersPage() {
                       <span className="orders-id">{order.id}</span>
                     </div>
                   </td>
-                  <td className="orders-table-cell">{order.userName}</td>
-                  <td className="orders-table-cell">{order.date}</td>
-                  <td className="orders-table-cell">{order.total.toFixed(2)} DZD</td>
-                  <td className="orders-table-cell">{order.items}</td>
+                  <td className="orders-table-cell">{order.customerName}</td>
+                  <td className="orders-table-cell">{order.datePurchased}</td>
+                  <td className="orders-table-cell">{order.grandTotal.toFixed(2)} DZD</td>
+                  <td className="orders-table-cell">{order.numberOfProducts}</td>
                   <td className="orders-table-cell">{order.address}</td>
                   <td className="orders-table-cell">
                     <StatusBadge state={mapStatusToBadge(order.status)} />
@@ -287,6 +293,23 @@ export default function OrdersPage() {
           <ChevronRight className="w-4 h-4" />
         </button>
       </div>
+      {/* Delete Confirmation Modal */}
+      {productToDelete && (
+        <DeleteProductModal
+          isOpen={deleteModalOpen}
+          resourceId={productToDelete}
+          resourceType="order"
+          onClose={() => {
+            setDeleteModalOpen(false);
+            setProductToDelete(null);
+          }}
+          onSuccess={() => {
+            setDeleteModalOpen(false);
+            setProductToDelete(null);
+            alert('Order deleted successfully');
+          }}
+        />
+      )}
     </div>
   );
 }
