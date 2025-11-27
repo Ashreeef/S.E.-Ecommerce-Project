@@ -11,6 +11,7 @@ import { Upload, X, Plus } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/product-form.css';
 import { Product } from '@/lib/types/product';
+import Link from 'next/link';
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 const COLORS = [
@@ -138,9 +139,9 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
     <div className="page-container product-form-container">
       {/* Breadcrumb */}
       <div className="product-form-breadcrumb">
-        <span>Dashboard</span>
+        <Link href="/admin" className="text-gray-600 hover:underline">Dashboard</Link>
         <span className="product-form-breadcrumb-separator">/</span>
-        <span>Products</span>
+        <Link href="/admin/products" className="text-gray-600 ">Products</Link>
         <span className="product-form-breadcrumb-separator">/</span>
         <span className="product-form-breadcrumb-active">
           {isEdit ? 'Edit product' : 'New product'}

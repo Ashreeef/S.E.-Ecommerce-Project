@@ -35,17 +35,6 @@ export default function OrderDetailsPage() {
 
 	return (
 		<div className="page-container">
-			<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-				<h2>Orders &nbsp; &gt; &nbsp; {order.id}</h2>
-				<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-					<select value={selectedStatus} onChange={e => setSelectedStatus(e.target.value as OrderStatus)}>
-						{STATUS_OPTIONS.map(s => (
-							<option key={s} value={s}>{s}</option>
-						))}
-					</select>
-					<CustomButton text="Save" onClick={onSave} />
-				</div>
-			</div>
 
 			<OrderForm order={order} />
 		</div>

@@ -142,7 +142,6 @@ export default function AccountTab() {
           >
             <option>English</option>
             <option>French</option>
-            <option>Spanish</option>
             <option>Arabic</option>
           </select>
           <div className="form-select-icon">

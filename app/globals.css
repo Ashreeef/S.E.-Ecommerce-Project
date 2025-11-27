@@ -378,3 +378,13 @@
 .font-work-sans { font-family: var(--font-work-sans); }
 .font-tajawal { font-family: var(--font-tajawal); }
 .font-poppins { font-family: 'Poppins', sans-serif; }
+
+/* Prevent horizontal scrolling caused by elements overflowing the viewport */
+html, body, #__next {
+  overflow-x: hidden;
+}
+
+/* Extra safety: page containers should not overflow horizontally */
+.page-container {
+  overflow-x: hidden;
+}

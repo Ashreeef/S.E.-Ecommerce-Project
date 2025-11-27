@@ -15,7 +15,8 @@
 }
 
 .product-form-breadcrumb-active {
-  @apply text-gray-900 font-medium;
+  @apply font-medium;
+  color: var(--main-main);
 }
 
 /* Form Layout */
@@ -188,4 +189,3 @@
 .product-form-button-primary {
   @apply px-6 bg-black text-white hover:bg-gray-800;
 }
-
