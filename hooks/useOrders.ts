@@ -35,7 +35,7 @@ export function useOrder(orderId?: string) {
   useEffect(() => {
     if (orderId) fetchOrder(orderId);
   }, [orderId, fetchOrder]);
-
+  // update status in order detail page
   const updateStatus = useCallback(async (id: string, status: Order['status']) => {
     setIsLoading(true);
     setError(null);

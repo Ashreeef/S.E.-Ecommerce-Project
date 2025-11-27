@@ -77,7 +77,6 @@ export default function DeleteProductModal({
         onSuccess?.();
         onClose();
       } else {
-        // show simple alert for now
         alert('Failed to delete the item');
       }
     } catch (err) {

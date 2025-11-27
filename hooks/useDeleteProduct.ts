@@ -11,7 +11,7 @@ export default function useDeleteProduct() {
     setIsLoading(true);
     setError(null);
     try {
-      // Try server API first
+      
       const res = await fetch(`/api/products/${encodeURIComponent(id)}`, {
         method: 'DELETE',
       });
@@ -21,13 +21,13 @@ export default function useDeleteProduct() {
         return true;
       }
 
-      // If server returns non-ok, fall back to local mock deletion
+      // fall back to local mock deletion
       const idx = products.findIndex(p => p.id === id);
       if (idx !== -1) products.splice(idx, 1);
       setIsLoading(false);
       return true;
     } catch (err: any) {
-      // Network error or no API — mutate mock list so UI can reflect deletion
+      // Network error or no API mutate mock list so UI can reflect deletion
       const idx = products.findIndex(p => p.id === id);
       if (idx !== -1) products.splice(idx, 1);
       setError(err instanceof Error ? err : new Error(String(err)));
