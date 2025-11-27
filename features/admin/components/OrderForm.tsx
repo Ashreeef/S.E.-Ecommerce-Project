@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Order } from '@/lib/types/orders';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { CustomButton } from '@/components/ui/custom-button';
+import { Input } from '@/components/ui';
 import { useOrder } from '@/hooks/useOrders';
 import { Download } from 'lucide-react';
 import '@/styles/order-details.css';
@@ -50,23 +51,13 @@ export default function OrderForm({ order }: OrderFormProps) {
           </div>
         </div>
         <div className="order-header-actions">
-          <div className="order-header-id">
-            <div className="order-header-id-label">Order ID -</div>
-            <div className="order-header-id-value">#{order.id}</div>
-          </div>
           <div className="order-header-controls">
-            <select
+            <Input
+              variant="list"
+              options={['Delivered', 'Confirmed', 'Returned', 'Canceled', 'Pending', 'Sent']}
               value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as Order['status'])}
-              className="order-status-select"
-            >
-              <option>Delivered</option>
-              <option>Confirmed</option>
-              <option>Returned</option>
-              <option>Canceled</option>
-              <option>Pending</option>
-              <option>Sent</option>
-            </select>
+              onChange={(value) => setSelectedStatus(value as Order['status'])}
+            />
             <CustomButton
               text="Save"
               onClick={handleSave}

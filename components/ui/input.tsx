@@ -44,6 +44,8 @@ export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 
   disabled?: boolean;
   /** Additional CSS classes */
   className?: string;
+  /** Input type attribute */
+  type?: string;
   /** Focus event handler */
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
   /** Blur event handler */
@@ -78,6 +80,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
+    const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const isListType = variant === 'list';
     const hasValue = Boolean(internalValue);
@@ -90,6 +93,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         setInternalValue(value);
       }
     }, [value]);
+
+    // Cleanup timeout on unmount
+    useEffect(() => {
+      return () => {
+        if (blurTimeoutRef.current) {
+          clearTimeout(blurTimeoutRef.current);
+        }
+      };
+    }, []);
     
     const getInputBorderStyles = () => {
       if (isError) {
@@ -117,9 +129,15 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     // Event Handlers
     const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      // Clear any pending blur timeout
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+        blurTimeoutRef.current = null;
+      }
+
       if (!disabled) {
         setIsFocused(true);
-        if (isListType) {
+        if (isListType && !isDropdownOpen) {
           setIsDropdownOpen(true);
         }
       }
@@ -127,13 +145,22 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     };
 
     const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-      setTimeout(() => {
-        setIsFocused(false);
-        if (isListType) {
+      // Clear any existing timeout
+      if (blurTimeoutRef.current) {
+        clearTimeout(blurTimeoutRef.current);
+      }
+
+      // Set new timeout
+      blurTimeoutRef.current = setTimeout(() => {
+        // Check if we're still focused on an element within the container
+        if (containerRef.current && !containerRef.current.contains(document.activeElement)) {
+          setIsFocused(false);
           setIsDropdownOpen(false);
           setFocusedOptionIndex(-1);
         }
+        blurTimeoutRef.current = null;
       }, 150);
+      
       onBlur?.(e);
     };
 
@@ -148,6 +175,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       onChange?.(option);
       setIsDropdownOpen(false);
       setIsFocused(false);
+      setFocusedOptionIndex(-1);
       inputRef.current?.blur();
     };
 
@@ -169,7 +197,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           break;
         case 'Enter':
           e.preventDefault();
-          if (focusedOptionIndex >= 0) {
+          if (focusedOptionIndex >= 0 && options[focusedOptionIndex]) {
             handleOptionSelect(options[focusedOptionIndex]);
           }
           break;
@@ -182,12 +210,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       }
     };
 
-    const toggleDropdown = () => {
-      if (!disabled && !loading && isListType) {
-        setIsDropdownOpen(!isDropdownOpen);
+    const handleInputClick = () => {
+      if (isListType && !disabled && !loading) {
+        // If dropdown is closed, open it; if open, keep it open
         if (!isDropdownOpen) {
-          inputRef.current?.focus();
+          setIsDropdownOpen(true);
         }
+        inputRef.current?.focus();
       }
     };
     
@@ -195,7 +224,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
         if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+          if (blurTimeoutRef.current) {
+            clearTimeout(blurTimeoutRef.current);
+            blurTimeoutRef.current = null;
+          }
           setIsDropdownOpen(false);
+          setIsFocused(false);
           setFocusedOptionIndex(-1);
         }
       };
@@ -217,7 +251,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       return icon;
     };
 
-    // Render
     return (
       <div 
         ref={containerRef}
@@ -250,16 +283,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {/* Input Field */}
             <input
               ref={ref || inputRef}
-              type="text"
+              type={isListType ? "text" : props.type ?? "text"}
               value={internalValue}
               onChange={isListType ? undefined : handleChange}
               onFocus={handleFocus}
               onBlur={handleBlur}
               onKeyDown={handleKeyDown}
-              onClick={isListType ? toggleDropdown : undefined}
+              onClick={handleInputClick}
               placeholder={placeholder}
               disabled={disabled || loading}
               readOnly={isListType}
+              role={isListType ? "combobox" : undefined}
               className={cn(
                 'flex-1 bg-transparent outline-none',
                 'text-sm sm:text-base',
@@ -270,6 +304,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               )}
               aria-invalid={isError}
               aria-describedby={caption ? 'input-caption' : undefined}
+              aria-expanded={isListType ? isDropdownOpen : undefined}
+              aria-haspopup={isListType ? "listbox" : undefined}
               {...props}
             />
 
@@ -300,7 +336,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               'max-h-60 overflow-y-auto shadow-lg'
             )}
             role="listbox"
-            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => {
+              // Prevent blur when clicking inside dropdown
+              e.preventDefault();
+            }}
           >
             {options.length > 0 ? (
               options.map((option, index) => (
