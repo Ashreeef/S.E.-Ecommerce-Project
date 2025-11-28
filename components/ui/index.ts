@@ -13,3 +13,9 @@ export { NavigationButtons, type NavigationButtonsProps } from './navigation-but
 export { NavBar, type NavBarProps } from './navbar';
 export { Footer, type FooterProps, type FooterLink, type FooterSection } from './footer';
 export { FavoritesToolbar } from './favorites-toolbar';
+export { ProductImageGallery } from './product-image-gallery';
+export { SizeSelector } from './size-selector';
+export { ColorSelector } from './color-selector';
+export { ProductInfoAccordion } from './product-info-accordion';
+export { ProductDetailsView } from './product-details-view';
+
