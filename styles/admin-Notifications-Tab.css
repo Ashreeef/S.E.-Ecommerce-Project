@@ -1,0 +1,84 @@
+/*
+ * styles/admin-Notifications-Tab.css
+ * This file contains the custom styles for the NotificationsTab component.
+ */
+
+/* 1. Typography Styles */
+
+/* Main "Notification settings" title */
+@import "tailwindcss";
+.notification-main-title {
+    /* Bold, Black, and slightly larger font size (assuming settings-card-title is large) */
+    /* Overriding or extending the default settings-card-title styles */
+    @apply text-xl font-bold;
+    color: #000000; /* Black */
+    margin-bottom: 1.5rem; /* Space below the main title */
+}
+
+/* Individual notification titles (e.g., "Order notifications") */
+.notification-title {
+    /* Smaller than main title, Dark Grey */
+    @apply text-sm font-medium;
+    color: #4a4a4a; /* Dark Grey */
+}
+
+/* Individual notification descriptions/sub-labels */
+.notification-description {
+    /* Lighter Grey than big label, smaller text */
+    @apply text-xs mt-0.5;
+    color: #888888; /* Lighter Dark Grey */
+}
+
+/* General item layout */
+.notification-item {
+    @apply flex items-center justify-between py-3;
+}
+
+/* Separator line style */
+.notification-separator {
+    @apply my-2 border-gray-100;
+}
+
+
+/* 2. Toggle Switch Styles */
+
+/* Base style for the entire label/interactive area */
+.toggle-switch-label {
+    @apply relative inline-flex items-center cursor-pointer;
+}
+
+/* Base style for the track (the colored bar) */
+.toggle-track {
+    /* Dimensions and shape */
+    @apply w-10 h-6 rounded-full shadow-inner transition-all duration-300 flex items-center p-0.5;
+    /* Custom position logic */
+}
+
+/* Track style when OFF (Disable Notification Sound example in your image) */
+.toggle-track-off {
+    background-color: #e0e0e0; /* Light Grey */
+    justify-content: flex-start;
+}
+
+/* Track style when ON (Order Notifications example in your image) */
+.toggle-track-on {
+    background-color: #ffd5d7; /* Light Pink - #ffd5d7 */
+    justify-content: flex-end;
+}
+
+
+/* Base style for the thumb (the moving circle) */
+.toggle-thumb {
+    /* Dimensions and shape */
+    @apply h-5 w-5 rounded-full shadow transition-all duration-300;
+}
+
+/* Thumb style when OFF */
+.toggle-thumb-off {
+    background-color: #f9f9f9; /* Very Light Grey/White */
+}
+
+/* Thumb style when ON */
+.toggle-thumb-on {
+    background-color: #ff6b81; /* Bolder Pink */
+}
