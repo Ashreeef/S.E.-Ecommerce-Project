@@ -1,0 +1,187 @@
+@import "tailwindcss";
+
+/* Customers List Container */
+.customers-list-container {
+  @apply space-y-6;
+}
+
+/* Breadcrumb */
+.customers-breadcrumb {
+  @apply mb-4 text-sm text-gray-600;
+}
+
+.customers-breadcrumb-separator {
+  @apply mx-2;
+}
+
+/* Toolbar */
+.customers-toolbar {
+  @apply flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between;
+}
+
+.customers-toolbar-left {
+  @apply flex-1 w-full sm:w-auto;
+}
+
+.customers-search-input {
+  @apply max-w-md;
+}
+
+.customers-toolbar-right {
+  @apply flex flex-wrap gap-2 items-center;
+}
+
+.customers-toolbar-button {
+  @apply flex items-center gap-2;
+}
+
+/* Table Container */
+.customers-table-container {
+  @apply bg-white rounded-lg shadow-sm overflow-hidden;
+}
+
+.customers-table {
+  @apply w-full border-collapse;
+}
+
+.customers-table thead {
+  @apply bg-gray-50;
+}
+
+.customers-table-header {
+  @apply px-4 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider;
+}
+
+.customers-table-checkbox {
+  @apply px-4 py-3 w-12;
+}
+
+.customers-checkbox {
+  @apply w-4 h-4 text-gray-600 border-gray-300 rounded focus:ring-gray-500;
+}
+
+.customers-table-row {
+  @apply border-b border-gray-200 hover:bg-gray-50 transition-colors;
+}
+
+.customers-table-row:last-child {
+  @apply border-b-0;
+}
+
+.customers-table-cell {
+  @apply px-4 py-3 text-sm text-gray-900;
+}
+
+/* New style for the total spent to match the design (red/pink) */
+.customers-total-spent {
+    color: #FF6B81; 
+    font-weight: 500;
+}
+
+.customers-name-cell {
+  @apply flex flex-col;
+}
+
+.customers-id {
+  @apply font-medium text-gray-900;
+}
+
+.customers-actions-cell {
+  @apply flex items-center gap-2;
+}
+
+.customers-action-button {
+  @apply p-1.5 rounded hover:bg-gray-100 text-gray-600 hover:text-gray-900 transition-colors;
+}
+
+.customers-action-button-delete {
+  @apply hover:bg-red-50 hover:text-red-600;
+}
+
+.customers-table-empty {
+  @apply px-4 py-8 text-center text-gray-500;
+}
+
+/* Pagination */
+.customers-pagination {
+  @apply flex items-center justify-center gap-2;
+}
+
+.customers-pagination-button {
+  @apply p-2 rounded border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors;
+}
+
+.customers-pagination-numbers {
+  @apply flex items-center gap-1;
+}
+
+.customers-pagination-number {
+  @apply px-3 py-1.5 rounded text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors;
+}
+
+.customers-pagination-number-active {
+  @apply bg-gray-900 text-white hover:bg-gray-800;
+}
+
+.customers-pagination-ellipsis {
+  @apply px-2 text-gray-500;
+}
+
+/* Mobile list cards (used for small screens) */
+.customers-mobile-list {
+  @apply space-y-3;
+}
+
+.mobile-customer-card {
+  @apply border border-gray-200 rounded-lg bg-white p-3;
+}
+
+.mobile-expand-button {
+  @apply p-2 rounded-full text-gray-600 hover:bg-gray-100 transition-colors;
+}
+
+.mobile-customer-details {
+  @apply mt-3 text-sm text-gray-700;
+}
+
+.mobile-customer-details .grid {
+  @apply grid grid-cols-2 gap-2;
+}
+
+.mobile-customer-details strong {
+  @apply font-medium text-gray-800;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .customers-table-container {
+    @apply overflow-x-auto;
+  }
+
+  .customers-table {
+    @apply min-w-full;
+  }
+
+  .customers-table-header,
+  .customers-table-cell {
+    @apply px-2 py-2 text-xs;
+  }
+
+  .customers-toolbar {
+    @apply flex-col;
+  }
+
+  .customers-toolbar-right {
+    @apply w-full justify-start;
+  }
+}
+
+/* Ensure desktop table hides gracefully on very small screens if needed */
+@media (max-width: 640px) {
+  .customers-table-container {
+    @apply hidden;
+  }
+  .customers-mobile-list {
+    @apply block;
+  }
+}
