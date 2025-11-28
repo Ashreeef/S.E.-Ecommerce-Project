@@ -1,29 +1,13 @@
-/*import '@/styles/admin-dashboard.css';
-
-export default function CustomersPage() {
-  return (
-    <div className="page-container">
-      <div className="page-header">
-        <h2 className="page-title">Customers</h2>
-        <p className="page-subtitle">Manage customer information</p>
-      </div>
-      <div className="page-content">
-        <p className="page-content-text">Customers content will be displayed here.</p>
-      </div>
-    </div>
-  );
-}*/
 'use client';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { CustomButton } from '@/components/ui/custom-button';
 import { Input } from '@/components/ui/input';
-// No StatusBadge needed for Customers table based on the image
 import { ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
-import '@/styles/customers-list.css'; // Use the new CSS file
-import { customers, Customer } from '@/lib/types/customers'; // Import Customer data
+import '@/styles/customers-list.css';
+import { customers, Customer } from '@/lib/types/customers';
 
 // Use customers imported from `lib/types/customers.ts` as the mock list
 const mockCustomers: Customer[] = customers;

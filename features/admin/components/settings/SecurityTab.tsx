@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import '@/styles/settings.css';
-import '@/styles/admin-SecurityTab.css'; 
+import '@/styles/admin-SecurityTab.css';
 
-// --- Reusable Toggle Component ---
 interface SecurityToggleProps {
   title: string;
   description: string;
@@ -19,7 +18,6 @@ const SecurityToggle: React.FC<SecurityToggleProps> = ({
   onToggle,
 }) => {
   return (
-    // The toggle container handles the alignment of text and the switch
     <div className="security-item toggle-container">
       <div className="flex-1">
         <h3 className="security-toggle-title">
@@ -30,7 +28,6 @@ const SecurityToggle: React.FC<SecurityToggleProps> = ({
         </p>
       </div>
       
-      {/* Toggle Switch implementation */}
       <label className="toggle-switch-label">
         <input
           type="checkbox"
@@ -47,7 +44,6 @@ const SecurityToggle: React.FC<SecurityToggleProps> = ({
   );
 };
 
-// --- Main Component ---
 export default function SecurityTab() {
   const [formData, setFormData] = useState({
     email: 'email@email.com',
@@ -72,12 +68,10 @@ export default function SecurityTab() {
   return (
     <div className="settings-section">
       <section className="settings-card">
-        {/* Main Title */}
         <h2 className="security-main-title">
           Security settings
         </h2>
         
-        {/* Email Field and Button */}
         <div className="security-item field-action-container">
           <div className="form-field security-input-wrapper">
             <label className="form-label security-label">
@@ -99,7 +93,6 @@ export default function SecurityTab() {
           </button>
         </div>
 
-        {/* Password Field and Button */}
         <div className="security-item field-action-container">
           <div className="form-field security-input-wrapper">
             <label className="form-label security-label">
@@ -122,7 +115,6 @@ export default function SecurityTab() {
           </button>
         </div>
 
-        {/* 2-Step Authentication Toggle */}
         <hr className="security-separator" />
 
         <SecurityToggle
