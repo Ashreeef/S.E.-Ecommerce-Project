@@ -1,9 +1,9 @@
 "use client";
 
-import React, { 
-  forwardRef, 
-  useState, 
-  useRef, 
+import React, {
+  forwardRef,
+  useState,
+  useRef,
   useEffect,
   type InputHTMLAttributes,
   type ReactNode,
@@ -72,12 +72,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     onBlur,
     ...props
   }, ref) => {
-    
+
     const [isFocused, setIsFocused] = useState(false);
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [internalValue, setInternalValue] = useState(value);
     const [focusedOptionIndex, setFocusedOptionIndex] = useState(-1);
-    
+
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const blurTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -92,7 +92,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       if (value !== undefined && value !== internalValue) {
         setInternalValue(value);
       }
-    }, [value]);
+    }, [value, internalValue]);
 
     // Cleanup timeout on unmount
     useEffect(() => {
@@ -102,7 +102,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         }
       };
     }, []);
-    
+
     const getInputBorderStyles = () => {
       if (isError) {
         return 'border-error-300 focus-within:ring-2 focus-within:ring-error-200';
@@ -160,7 +160,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         }
         blurTimeoutRef.current = null;
       }, 150);
-      
+
       onBlur?.(e);
     };
 
@@ -185,13 +185,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          setFocusedOptionIndex(prev => 
+          setFocusedOptionIndex(prev =>
             prev < options.length - 1 ? prev + 1 : 0
           );
           break;
         case 'ArrowUp':
           e.preventDefault();
-          setFocusedOptionIndex(prev => 
+          setFocusedOptionIndex(prev =>
             prev > 0 ? prev - 1 : options.length - 1
           );
           break;
@@ -219,7 +219,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         inputRef.current?.focus();
       }
     };
-    
+
     // Close dropdown on outside click
     useEffect(() => {
       const handleClickOutside = (event: MouseEvent) => {
@@ -239,7 +239,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         return () => document.removeEventListener('mousedown', handleClickOutside);
       }
     }, [isDropdownOpen]);
-    
+
     const renderIcon = (icon: React.ReactNode, size: string = 'w-5 h-5 sm:w-5 sm:h-5') => {
       if (React.isValidElement(icon)) {
         return (
@@ -252,7 +252,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     };
 
     return (
-      <div 
+      <div
         ref={containerRef}
         className={cn('flex flex-col items-start gap-2 w-full max-w-[385px] relative', className)}
       >
@@ -264,7 +264,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         )}
 
         {/* Input Container */}
-        <div 
+        <div
           className={cn(
             'flex items-center justify-between w-full bg-white',
             'border transition-all duration-200',
@@ -314,7 +314,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               {loading ? (
                 <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin text-neutral-400" />
               ) : isListType ? (
-                <ChevronDown 
+                <ChevronDown
                   className={cn(
                     'w-4 h-4 sm:w-5 sm:h-5 text-neutral-400 transition-transform duration-200',
                     isDropdownOpen && 'rotate-180'
@@ -329,7 +329,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {/* Dropdown Options */}
         {isListType && isDropdownOpen && (
-          <div 
+          <div
             className={cn(
               'absolute top-full left-0 right-0 z-50',
               'bg-white border-x border-b border-neutral-300 rounded-b',
@@ -369,7 +369,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         {/* Caption */}
         {caption && (
-          <div 
+          <div
             id="input-caption"
             className={cn('font-normal text-xs sm:text-sm', getCaptionColor())}
           >
