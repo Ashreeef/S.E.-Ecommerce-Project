@@ -21,8 +21,9 @@ export function useProduct(productId?: string) {
         setIsLoading(false);
         return;
       }
-      const data = await res.json();
-      setProduct(data as Product);
+      const response = await res.json();
+      // Extract product from API response { success: true, data: product }
+      setProduct(response.data || response);
     } catch (err) {
       const local = mockProducts.find(p => p.id === id) || null;
       setProduct(local);

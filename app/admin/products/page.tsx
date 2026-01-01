@@ -10,13 +10,7 @@ import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
 import { Plus, ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/products-list.css';
-import {products } from '@/lib/types/product';
-import { Product } from '@/lib/types/product';
-
-// Mock product data - in production, this would come from an API
-
-// Use products imported from `lib/types/product.ts` as the mock list
-const mockProducts: Product[] =  products;
+import { useProducts, useDeleteProduct, Product as ApiProduct } from '@/hooks/useProductsApi';
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -25,10 +19,14 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const productsPerPage = 10;
-  const totalPages = Math.ceil(mockProducts.length / productsPerPage);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
+
+  // Fetch products from API
+  const { data, isLoading, isError } = useProducts();
+  const products = data?.data || [];
+  
+  const totalPages = Math.ceil(products.length / productsPerPage);
 
   const toggleRow = (id: string) => {
     setExpandedRows(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -36,7 +34,7 @@ export default function ProductsPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedProducts(mockProducts.map(p => p.id));
+      setSelectedProducts(products.map((p: ApiProduct) => p.id));
     } else {
       setSelectedProducts([]);
     }
@@ -61,13 +59,11 @@ export default function ProductsPage() {
 
 
   const handleCloseModal = () => {
-    if (!isDeleting) {
-      setDeleteModalOpen(false);
-      setProductToDelete(null);
-    }
+    setDeleteModalOpen(false);
+    setProductToDelete(null);
   };
 
-  const filteredProducts = mockProducts.filter(product =>
+  const filteredProducts = products.filter((product: ApiProduct) =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -91,6 +87,21 @@ export default function ProductsPage() {
         <h2 className="page-title">Products</h2>
       </div>
 
+      {/* Loading & Error States */}
+      {isLoading && (
+        <div className="text-center py-8">
+          <p>Loading products...</p>
+        </div>
+      )}
+
+      {isError && (
+        <div className="text-center py-8 text-red-600">
+          <p>Error loading products. Please try again.</p>
+        </div>
+      )}
+
+      {!isLoading && !isError && (
+        <>
       {/* Toolbar */}
       <div className="products-toolbar">
         <div className="products-toolbar-left">
@@ -135,7 +146,7 @@ export default function ProductsPage() {
         {paginatedProducts.length === 0 ? (
           <div className="products-table-empty">No products found</div>
         ) : (
-          paginatedProducts.map((product) => (
+          paginatedProducts.map((product: ApiProduct) => (
             <div key={product.id} className="mobile-product-card border rounded mb-3 p-3 bg-white">
               <div className="flex items-center justify-between">
                 <div>
@@ -154,14 +165,13 @@ export default function ProductsPage() {
               {expandedRows.includes(product.id) && (
                 <div className="mobile-product-details mt-3 text-sm text-neutral-600">
                   <div className="grid grid-cols-2 gap-2">
-                    <div><strong>Gender</strong>: {product.gender}</div>
+                    <div><strong>Gender</strong>: {product.gender || 'N/A'}</div>
                     <div><strong>Category</strong>: {product.category}</div>
-                    <div><strong>QTY</strong>: {product.stock ?? 0}</div>
-                    <div><strong>Sales</strong>: {product.sales ?? 0}</div>
-                    <div><strong>Price</strong>: {(product.price ?? 0).toFixed(2)} DZD</div>
-                    <div><strong>Date</strong>: {product.date}</div>
+                    <div><strong>QTY</strong>: {product.stock}</div>
+                    <div><strong>Price</strong>: {product.price.toFixed(2)} DZD</div>
+                    <div><strong>Date</strong>: {new Date(product.created_at).toLocaleDateString()}</div>
                     <div className="col-span-2">
-                      <StatusBadge state={((product.status ?? '') as string).toLowerCase() as 'available' | 'out-of-stock' | 'pending'} />
+                      <StatusBadge state={product.is_available ? 'available' : 'out-of-stock'} />
                     </div>
                   </div>
                   <div className="flex gap-2 mt-3">
@@ -192,7 +202,6 @@ export default function ProductsPage() {
               <th className="products-table-header">Gender</th>
               <th className="products-table-header">Category</th>
               <th className="products-table-header">QTY</th>
-              <th className="products-table-header">Sales</th>
               <th className="products-table-header">Price</th>
               <th className="products-table-header">Date</th>
               <th className="products-table-header">Status</th>
@@ -202,12 +211,12 @@ export default function ProductsPage() {
           <tbody>
             {paginatedProducts.length === 0 ? (
               <tr>
-                <td colSpan={10} className="products-table-empty">
+                <td colSpan={9} className="products-table-empty">
                   No products found
                 </td>
               </tr>
             ) : (
-              paginatedProducts.map((product) => (
+              paginatedProducts.map((product: ApiProduct) => (
                 <tr key={product.id} className="products-table-row">
                   <td className="products-table-checkbox">
                     <input
@@ -223,14 +232,13 @@ export default function ProductsPage() {
                       <span className="products-id">{product.id}</span>
                     </div>
                   </td>
-                  <td className="products-table-cell">{product.gender}</td>
+                  <td className="products-table-cell">{product.gender || 'N/A'}</td>
                   <td className="products-table-cell">{product.category}</td>
-                  <td className="products-table-cell">{product.stock ?? 0}</td>
-                  <td className="products-table-cell">{product.sales ?? 0}</td>
-                  <td className="products-table-cell">{(product.price ?? 0).toFixed(2)} DZD</td>
-                  <td className="products-table-cell">{product.date}</td>
+                  <td className="products-table-cell">{product.stock}</td>
+                  <td className="products-table-cell">{product.price.toFixed(2)} DZD</td>
+                  <td className="products-table-cell">{new Date(product.created_at).toLocaleDateString()}</td>
                   <td className="products-table-cell">
-                    <StatusBadge state={((product.status ?? '') as string).toLowerCase() as 'available' | 'out-of-stock' | 'pending'} />
+                    <StatusBadge state={product.is_available ? 'available' : 'out-of-stock'} />
                   </td>
                   <td className="products-table-cell products-actions-cell">
                     <button
@@ -312,9 +320,10 @@ export default function ProductsPage() {
           onSuccess={() => {
             setDeleteModalOpen(false);
             setProductToDelete(null);
-            alert('Product deleted successfully');
           }}
         />
+      )}
+      </>
       )}
     </div>
   );
