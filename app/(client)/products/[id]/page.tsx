@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { ProductDetailsView } from '@/components/ui/product-details-view';
 import { ProductGrid } from '@/components/ui/product-grid';
 import { useFavorites } from '@/hooks/useFavorites';
-import { mockProducts } from '@/lib/mock-data';
+import { useProduct, useProducts, Product as ApiProduct } from '@/hooks/useProductsApi';
 import { mapColorsToHex } from '@/lib/color-utils';
 
 export default function ProductDetailPage() {
@@ -14,49 +14,92 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const productId = params.id as string;
   const { favorites, toggleFavorite } = useFavorites();
+  
+  // Fetch single product
+  const { data: productData, isLoading, isError } = useProduct(productId);
+  
+  // Fetch all products for related products
+  const { data: allProductsData } = useProducts();
 
   const product = useMemo(() => {
-    const foundProduct = mockProducts.find(p => p.id === productId);
-    if (!foundProduct) return null;
+    const apiProduct = productData?.data;
+    if (!apiProduct) return null;
 
     return {
-      id: foundProduct.id,
-      name: foundProduct.title,
-      category: foundProduct.category,
-      type: 'Fashion',
-      isAvailable: foundProduct.availability,
-      rating: foundProduct.rating,
-      reviewCount: 435,
-      price: foundProduct.price,
-      originalPrice: foundProduct.originalPrice,
-      images: [
-        { id: `${foundProduct.id}-1`, url: foundProduct.image, alt: foundProduct.title },
-        { id: `${foundProduct.id}-2`, url: foundProduct.image, alt: `${foundProduct.title} - 2` },
-        { id: `${foundProduct.id}-3`, url: foundProduct.image, alt: `${foundProduct.title} - 3` },
-        { id: `${foundProduct.id}-4`, url: foundProduct.image, alt: `${foundProduct.title} - 4` },
-      ],
-      availableSizes: foundProduct.size,
-      availableColors: mapColorsToHex(foundProduct.colors || ['Black', 'White', 'Gray']),
-      description: foundProduct.description,
+      id: apiProduct.id,
+      name: apiProduct.name,
+      category: apiProduct.category,
+      type: apiProduct.type,
+      isAvailable: apiProduct.is_available,
+      rating: apiProduct.rating,
+      reviewCount: apiProduct.review_count,
+      price: apiProduct.price,
+      originalPrice: apiProduct.original_price,
+      images: apiProduct.images?.map((url: string, index: number) => ({
+        id: `${apiProduct.id}-${index}`,
+        url,
+        alt: `${apiProduct.name} - ${index + 1}`,
+      })) || [],
+      availableSizes: apiProduct.available_sizes || [],
+      availableColors: mapColorsToHex(apiProduct.available_colors || ['Black', 'White']),
+      description: `${apiProduct.name} - Premium quality ${apiProduct.category.toLowerCase()} item.`,
       fit: 'Regular fit - true to size',
-      materials: 'Premium cotton blend. Machine wash cold. Tumble dry low.',
+      materials: 'Premium materials. Machine wash cold. Tumble dry low.',
       delivery: 'Free shipping on orders over 10,000 DZD. Standard delivery 3-5 business days.',
     };
-  }, [productId]);
+  }, [productData]);
 
   // Related products: randomly select 4 products excluding the current one
   const relatedProducts = useMemo(() => {
-    return mockProducts
-      .filter(p => p.id !== productId)
+    const allProducts = allProductsData?.data || [];
+    return allProducts
+      .filter((p: ApiProduct) => p.id !== productId)
       .sort(() => Math.random() - 0.5)
-      .slice(0, 4);
-  }, [productId]);
+      .slice(0, 4)
+      .map((p: ApiProduct) => ({
+        id: p.id,
+        title: p.name,
+        image: p.images?.[0] || '',
+        price: p.price,
+        originalPrice: p.original_price,
+        rating: p.rating,
+        category: p.category,
+        availableSizes: p.available_sizes || [],
+        description: '',
+        isAvailable: p.is_available,
+        images: p.images?.map((url: string, index: number) => ({ 
+          id: `${p.id}-${index}`, 
+          url, 
+          alt: p.name 
+        })) || [],
+        availableColors: p.available_colors?.map((color: string) => ({ 
+          name: color, 
+          hex: '#000000' 
+        })) || [],
+        gender: 'UNISEX' as const,
+        stock: 10,
+        date: p.created_at,
+        sales: 0,
+        status: p.is_available ? 'Available' as const : 'Out-of-stock' as const,
+        reviewCount: p.review_count,
+      }));
+  }, [allProductsData, productId]);
 
   const handleAddToCart = (options: { size: string; color: string; quantity: number }) => {
     console.log('Add to cart:', { productId, ...options });
   };
 
-  if (!product) {
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="text-center">
+          <p>Loading product...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !product) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">
