@@ -22,7 +22,6 @@ export default function OrdersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
-  const [isDeleting, setIsDeleting] = useState(false);
   const ordersPerPage = 10;
   const totalPages = Math.ceil(mockOrders.length / ordersPerPage);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
@@ -136,7 +135,7 @@ export default function OrdersPage() {
             <div key={order.id} className="mobile-order-card border rounded mb-3 p-3 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                    <div className="font-medium">{order.customerName}</div>
+                  <div className="font-medium">{order.customerName}</div>
                   <div className="text-xs text-neutral-400">{order.id}</div>
                 </div>
                 <button
@@ -150,7 +149,7 @@ export default function OrdersPage() {
 
               {expandedRows.includes(order.id) && (
                 <div className="mobile-order-details mt-3 text-sm text-neutral-600">
-                    <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 gap-2">
                     <div><strong>Date</strong>: {order.datePurchased}</div>
                     <div><strong>Total</strong>: {order.grandTotal.toFixed(2)} DZD</div>
                     <div><strong>Items</strong>: {order.numberOfProducts}</div>
@@ -263,9 +262,8 @@ export default function OrdersPage() {
               <button
                 key={pageNum}
                 onClick={() => setCurrentPage(pageNum)}
-                className={`orders-pagination-number ${
-                  currentPage === pageNum ? 'orders-pagination-number-active' : ''
-                }`}
+                className={`orders-pagination-number ${currentPage === pageNum ? 'orders-pagination-number-active' : ''
+                  }`}
               >
                 {pageNum}
               </button>
@@ -276,9 +274,8 @@ export default function OrdersPage() {
               <span className="orders-pagination-ellipsis">.....</span>
               <button
                 onClick={() => setCurrentPage(totalPages)}
-                className={`orders-pagination-number ${
-                  currentPage === totalPages ? 'orders-pagination-number-active' : ''
-                }`}
+                className={`orders-pagination-number ${currentPage === totalPages ? 'orders-pagination-number-active' : ''
+                  }`}
               >
                 {totalPages}
               </button>
