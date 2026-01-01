@@ -1,6 +1,7 @@
 'use client';
 
-import { useProducts } from '@/hooks/useProductsApi';
+import { useProducts, Product } from '@/hooks/useProductsApi';
+import Image from 'next/image';
 
 export default function MyComponent() {
   const { data, isLoading, isError } = useProducts();
@@ -20,10 +21,10 @@ export default function MyComponent() {
       <h1 className="text-2xl font-bold mb-4">Products ({data?.count || 0})</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {products.map((product: any) => (
+        {products.map((product: Product) => (
           <div key={product.id} className="border p-4 rounded">
             {product.images?.[0] && (
-              <img 
+              <Image 
                 src={product.images[0]} 
                 alt={product.name}
                 className="w-full h-64 object-cover rounded mb-4"

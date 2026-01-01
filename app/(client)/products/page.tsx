@@ -5,9 +5,8 @@ import { ProductGrid } from '@/components/ui/product-grid';
 import { ProductsToolbar } from '@/components/ui/products-toolbar';
 import { NavigationButtons } from '@/components/ui/navigation-buttons';
 import { useFavorites } from '@/hooks/useFavorites';
-import { useProducts } from '@/hooks/useProductsApi';
+import { useProducts, Product as ApiProduct } from '@/hooks/useProductsApi';
 import { SortOption } from '@/components/ui/sort-control';
-
 export default function ProductsPage() {
     const [sortOption, setSortOption] = useState<SortOption>('default');
     const [currentPage, setCurrentPage] = useState(1);
@@ -17,7 +16,7 @@ export default function ProductsPage() {
 
     // Transform API data to match component format
     const products = useMemo(() => {
-        return (data?.data || []).map((product: any) => ({
+        return (data?.data || []).map((product: ApiProduct) => ({
             id: product.id,
             title: product.name,
             image: product.images?.[0] || '',
