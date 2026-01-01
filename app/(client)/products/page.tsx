@@ -25,7 +25,7 @@ export default function ProductsPage() {
             rating: product.rating,
             category: product.category,
             availableSizes: product.available_sizes || [],
-            description: '',
+            description: product.description || '',
             isAvailable: product.is_available,
             images: product.images?.map((url: string, index: number) => ({ 
                 id: `${product.id}-${index}`, 
@@ -36,8 +36,12 @@ export default function ProductsPage() {
                 name: color, 
                 hex: '#000000' 
             })) || [],
-            gender: 'UNISEX' as const,
-            stock: 10,
+            gender: (product.gender as 'MEN' | 'WOMEN' | 'UNISEX') || 'UNISEX',
+            stock: product.stock,
+            discount: product.discount,
+            discountType: product.discount_type,
+            fit: product.fit,
+            modelDetails: product.model_details,
             date: product.created_at,
             sales: 0,
             status: product.is_available ? 'Available' as const : 'Out-of-stock' as const,

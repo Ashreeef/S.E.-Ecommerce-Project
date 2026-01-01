@@ -112,43 +112,42 @@ export function useProductForm(): UseProductFormReturn {
     try {
       const submitData = new FormData();
       
-      // Map form data to Product structure
+      // Map form data to API structure
       submitData.append('name', formData.name);
-      submitData.append('description', formData.description);
+      submitData.append('description', formData.description || '');
       submitData.append('category', formData.category);
       submitData.append('price', formData.price.toString());
       submitData.append('stock', formData.stock.toString());
       submitData.append('discount', (formData.discount || 0).toString());
-      submitData.append('discountType', formData.discountType || '');
+      submitData.append('discountType', formData.discountType || 'percentage');
       submitData.append('color', formData.color || '');
       submitData.append('gender', formData.gender);
       submitData.append('fit', formData.fit || '');
       submitData.append('modelDetails', formData.modelDetails || '');
-      submitData.append('originalPrice', (formData.originalPrice || 0).toString());
-      submitData.append('image', formData.image);
       
-      // Map size string to availableSizes array
-      if (formData.availableSizes) {
-        const sizesArray = formData.availableSizes.split(',').map((s: string) => s.trim()).filter(Boolean);
-        submitData.append('availableSizes', JSON.stringify(sizesArray));
+      // Only append originalPrice if it has a value
+      if (formData.originalPrice && formData.originalPrice > 0) {
+        submitData.append('originalPrice', formData.originalPrice.toString());
       }
+      
+      submitData.append('image', formData.image || '');
+      
+      // Map availableSizes to API format
+      submitData.append('availableSizes', formData.availableSizes);
       
       // Map isAvailable boolean
       submitData.append('isAvailable', formData.isAvailable.toString());
+      
+      // Add rating and review count (defaults)
+      submitData.append('rating', '0');
+      submitData.append('reviewCount', '0');
 
-      // Handle images
-      if (formData.images.length > 0) {
-        submitData.append('imageCount', formData.images.length.toString());
-        formData.images.forEach((file: File, index: number) => {
-          if (file instanceof File) {
-            submitData.append(`image_${index}`, file);
-          }
-        });
-      }
-
-      // Add existing image URLs
+      // Handle images - use imageUrls for now
       if (formData.imageUrls && formData.imageUrls.length > 0) {
         submitData.append('existingImageUrls', JSON.stringify(formData.imageUrls));
+      } else if (formData.image) {
+        // Fallback to single image
+        submitData.append('existingImageUrls', JSON.stringify([formData.image]));
       }
 
       const url = isEdit && productId 
@@ -176,15 +175,7 @@ export function useProductForm(): UseProductFormReturn {
       return { success: true };
     } catch (error) {
       console.error('Error submitting form:', error);
-      // Fallback: simulate success for demo purposes when API is unavailable
-      console.log('API unavailable, using fallback mode');
-      
-      // Reset form on success (only for new products)
-      if (!isDraft && !isEdit) {
-        setFormData(initialFormData);
-      }
-      
-      return { success: true };
+      return { success: false, error: error instanceof Error ? error.message : 'An error occurred' };
     } finally {
       setIsLoading(false);
     }

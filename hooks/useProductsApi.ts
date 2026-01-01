@@ -15,6 +15,13 @@ export interface Product {
   images: string[];
   available_sizes: string[];
   available_colors: string[];
+  description: string | null;
+  stock: number;
+  discount: number;
+  discount_type: string;
+  gender: string | null;
+  fit: string | null;
+  model_details: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -31,6 +38,13 @@ export interface ProductInput {
   images?: string[];
   available_sizes?: string[];
   available_colors?: string[];
+  description?: string | null;
+  stock?: number;
+  discount?: number;
+  discount_type?: string;
+  gender?: string | null;
+  fit?: string | null;
+  model_details?: string | null;
 }
 
 // Query keys for cache management

@@ -10,10 +10,8 @@ import { useProduct } from '@/hooks/useProducts';
 import { Upload, X, Plus } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/product-form.css';
-import { Product } from '@/lib/types/product';
 import Link from 'next/link';
 
-const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
 const COLORS = [
   { name: 'Black', value: 'black', hex: '#000000' },
   { name: 'White', value: 'white', hex: '#FFFFFF' },
@@ -23,7 +21,6 @@ const COLORS = [
 ];
 const CATEGORIES = ['Jeans', 'Shirts', 'Polos', 'Jackets', 'Trousers', 'Sweaters'];
 const FITS = ['Baggy', 'Slim', 'Regular', 'Oversized', 'Relaxed'];
-const STATUS_OPTIONS = ['Available', 'Unavailable', 'Draft'];
 const DISCOUNT_TYPES = ['Back to school', 'Seasonal', 'Clearance', 'Flash sale', 'New customer'];
 
 interface ProductFormProps {
@@ -37,7 +34,6 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
   const {
     formData,
     updateField,
-    updateImages,
     removeImage,
     submitForm,
     isLoading,
@@ -46,39 +42,73 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
   } = useProductForm();
 
   // If productId is provided and no initialData, fetch product to initialize the form
-  const { product: fetchedProduct, isLoading: isProductLoading } = useProduct(productId);
+  const { product: fetchedProduct } = useProduct(productId);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const thumbnailInputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const [isUploading, setIsUploading] = useState(false);
 
   // Initialize form with product data if editing
   useEffect(() => {
     if (!isEdit) return;
 
     // priority: explicit initialData prop, otherwise fetched product
-    const source = initialData ? initialData : (fetchedProduct as Partial<Product> | undefined);
+    const source = initialData || fetchedProduct;
     if (source) {
-      const formDataToSet = {
-        name: (source as any).name || '',
-        description: (source as any).description || '',
-        modelDetails: (source as any).modelDetails || '',
-        availableSizes: Array.isArray((source as any).availableSizes) ? (source as any).availableSizes.join(', ') : ((source as any).availableSizes || ''),
-        isAvailable: (source as any).isAvailable ?? true,
-        price: (source as any).price || 0,
-        originalPrice: (source as any).originalPrice,
-        image: (source as any).image || '',
-        color: (source as any).color || '',
-        gender: (source as any).gender || 'UNISEX',
-        category: (source as any).category || '',
-        fit: (source as any).fit || '',
-        stock: (source as any).stock || 0,
-        discount: (source as any).discount || 0,
-        discountType: (source as any).discountType || '',
+      // Handle both Product type and ProductFormData type
+      const getName = (s: typeof source): string => {
+        if ('name' in s && typeof s.name === 'string') return s.name;
+        if ('title' in s && typeof s.title === 'string') return s.title;
+        return '';
+      };
+      
+      const getImages = (s: typeof source): string[] => {
+        if ('imageUrls' in s && s.imageUrls) return s.imageUrls;
+        if ('images' in s && Array.isArray(s.images)) {
+          return s.images.map((img) => (typeof img === 'string' ? img : 'url' in img ? img.url : ''));
+        }
+        if ('image' in s && typeof s.image === 'string') return [s.image];
+        return [];
+      };
+      
+      const getString = (key: string, altKey?: string): string => {
+        if (key in source && typeof source[key as keyof typeof source] === 'string') {
+          return source[key as keyof typeof source] as string;
+        }
+        if (altKey && altKey in source && typeof source[altKey as keyof typeof source] === 'string') {
+          return source[altKey as keyof typeof source] as string;
+        }
+        return '';
+      };
+      
+      const getNumber = (key: string): number => {
+        if (key in source && typeof source[key as keyof typeof source] === 'number') {
+          return source[key as keyof typeof source] as number;
+        }
+        return 0;
+      };
+      
+      const formDataToSet: ProductFormData = {
+        name: getName(source),
+        description: getString('description'),
+        modelDetails: getString('modelDetails', 'model_details'),
+        availableSizes: ('availableSizes' in source && Array.isArray(source.availableSizes)) 
+          ? source.availableSizes.join(', ') 
+          : getString('availableSizes'),
+        isAvailable: ('isAvailable' in source && typeof source.isAvailable === 'boolean') ? source.isAvailable : true,
+        price: getNumber('price'),
+        originalPrice: ('originalPrice' in source && typeof source.originalPrice === 'number') ? source.originalPrice : undefined,
+        image: getString('image'),
+        color: getString('color'),
+        gender: getString('gender') as 'MEN' | 'WOMEN' | 'UNISEX' || 'UNISEX',
+        category: getString('category'),
+        fit: getString('fit'),
+        stock: getNumber('stock'),
+        discount: getNumber('discount'),
+        discountType: getString('discountType', 'discount_type'),
         images: [],
-        imageUrls: Array.isArray((source as any).images)
-          ? (source as any).images.map((img: any) => (typeof img === 'string' ? img : img.url))
-          : ((source as any).image ? [(source as any).image] : []),
+        imageUrls: getImages(source),
       };
       initializeForm(formDataToSet);
       // Set image preview URLs from existing images
@@ -99,18 +129,56 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
     };
   }, [formData.images, formData.imageUrls]);
 
-  const handleImageUpload = (files: FileList | null, index?: number) => {
+  const uploadImagesToStorage = async (files: File[]): Promise<string[]> => {
+    if (files.length === 0) return [];
+
+    setIsUploading(true);
+    try {
+      const uploadFormData = new FormData();
+      files.forEach(file => {
+        uploadFormData.append('files', file);
+      });
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: uploadFormData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to upload images');
+      }
+
+      return result.urls || [];
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert(`Error uploading images: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      return [];
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleImageUpload = async (files: FileList | null, index?: number) => {
     if (!files || files.length === 0) return;
 
-    if (index !== undefined) {
-      // Update specific thumbnail
-      const file = files[0];
-      const newImages = [...formData.images];
-      newImages[index] = file;
-      updateField('images', newImages);
-    } else {
-      // Main image upload
-      updateImages(Array.from(files));
+    const filesToUpload = Array.from(files);
+    
+    // Upload to Supabase storage
+    const uploadedUrls = await uploadImagesToStorage(filesToUpload);
+    
+    if (uploadedUrls.length > 0) {
+      if (index !== undefined) {
+        // Update specific thumbnail
+        const newUrls = [...(formData.imageUrls || [])];
+        newUrls[index] = uploadedUrls[0];
+        updateField('imageUrls', newUrls);
+      } else {
+        // Add to main images
+        const existingUrls = formData.imageUrls || [];
+        updateField('imageUrls', [...existingUrls, ...uploadedUrls]);
+      }
     }
   };
 
@@ -124,6 +192,11 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
   };
 
   const handleSubmit = async () => {
+    if (isUploading) {
+      alert('Please wait for images to finish uploading');
+      return;
+    }
+
     const result = await submitForm(false, isEdit, productId);
     if (result.success) {
       alert(isEdit ? 'Product updated successfully!' : 'Product added successfully!');
@@ -166,7 +239,8 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
             {/* Main Image Upload */}
             <div
               className="product-image-upload"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={() => !isUploading && fileInputRef.current?.click()}
+              style={{ cursor: isUploading ? 'not-allowed' : 'pointer', opacity: isUploading ? 0.6 : 1 }}
             >
               <input
                 ref={fileInputRef}
@@ -175,8 +249,13 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
                 multiple
                 className="hidden"
                 onChange={(e) => handleImageUpload(e.target.files)}
+                disabled={isUploading}
               />
-              {allImageUrls.length > 0 ? (
+              {isUploading ? (
+                <div className="product-image-upload-loading">
+                  <p className="product-image-upload-text">Uploading images...</p>
+                </div>
+              ) : allImageUrls.length > 0 ? (
                 <div className="product-image-preview-container">
                   <img
                     src={allImageUrls[0]}
@@ -190,11 +269,10 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
                       if (formData.imageUrls && formData.imageUrls.length > 0) {
                         const newUrls = formData.imageUrls.slice(1);
                         updateField('imageUrls', newUrls);
-                      } else {
-                        removeImage(0);
                       }
                     }}
                     className="product-image-remove-btn"
+                    disabled={isUploading}
                   >
                     Remove
                   </button>
@@ -480,14 +558,14 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
           variant="outlined"
           text="Save draft"
           onClick={handleSaveDraft}
-          disabled={isLoading}
+          disabled={isLoading || isUploading}
           className="product-form-button"
         />
         <CustomButton
           text={isEdit ? 'Update product' : 'Add product'}
           onClick={handleSubmit}
           loading={isLoading}
-          disabled={isLoading}
+          disabled={isLoading || isUploading}
           className="product-form-button product-form-button-primary"
         />
       </div>
