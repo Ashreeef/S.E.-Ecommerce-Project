@@ -10,7 +10,7 @@ import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
 import { Plus, ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/products-list.css';
-import { useProducts, useDeleteProduct, Product as ApiProduct } from '@/hooks/useProductsApi';
+import { useProducts, Product as ApiProduct } from '@/hooks/useProductsApi';
 
 export default function ProductsPage() {
   const router = useRouter();

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { Input } from '@/components/ui/input';
 import { CustomButton } from '@/components/ui/custom-button';
 import { NumberInput } from '@/components/ui/number-input';
@@ -257,10 +258,12 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
                 </div>
               ) : allImageUrls.length > 0 ? (
                 <div className="product-image-preview-container">
-                  <img
+                  <Image
                     src={allImageUrls[0]}
                     alt="Main product"
                     className="product-image-preview"
+                    width={500}
+                    height={500}
                   />
                   <button
                     type="button"
@@ -304,10 +307,12 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
                   />
                   {allImageUrls[index + 1] ? (
                     <div className="product-thumbnail-preview">
-                      <img
+                      <Image
                         src={allImageUrls[index + 1]}
                         alt={`Thumbnail ${index + 1}`}
                         className="product-thumbnail-image"
+                        width={100}
+                        height={100}
                       />
                       <button
                         type="button"
