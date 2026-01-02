@@ -1,6 +1,7 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { withAuth } from '@/lib/auth/apiAuth';
 
 export async function GET(
   request: Request,
@@ -44,11 +45,13 @@ export async function GET(
 }
 
 export async function DELETE(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
+  // Protect this route - only authenticated users can delete
+  return withAuth(request, async (user) => {
+    try {
+      const { id } = await params;
 
     // First check if product exists
     const { data: existingProduct, error: fetchError } = await supabaseServer
@@ -108,14 +111,17 @@ export async function DELETE(
       { status: 500 }
     );
   }
+  });
 }
 
 export async function PUT(
-  request: Request,
+  request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const { id } = await params;
+  // Protect this route - only authenticated users can update
+  return withAuth(request, async (user) => {
+    try {
+      const { id } = await params;
     const formData = await request.formData();
 
     // Check if product exists
@@ -228,4 +234,5 @@ export async function PUT(
       { status: 500 }
     );
   }
+  });
 }

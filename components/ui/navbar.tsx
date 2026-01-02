@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
-import { Menu, X, Search, Heart, ShoppingCart } from 'lucide-react';
+import { Menu, X, Search, Heart, ShoppingCart, User, LogOut } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 
 export interface NavBarProps {
   logo?: string;
@@ -48,15 +49,21 @@ const NavBar: React.FC<NavBarProps> = ({
   className,
 }) => {
   const router = useRouter();
+  const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMobileMenuOpen(false);
+      }
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setUserMenuOpen(false);
       }
     };
 
@@ -64,6 +71,7 @@ const NavBar: React.FC<NavBarProps> = ({
       if (event.key === 'Escape') {
         setMobileMenuOpen(false);
         setSearchOpen(false);
+        setUserMenuOpen(false);
       }
     };
 
@@ -71,6 +79,9 @@ const NavBar: React.FC<NavBarProps> = ({
       document.addEventListener('mousedown', handleClickOutside);
       document.addEventListener('keydown', handleEscape);
       document.body.style.overflow = 'hidden';
+    } else {
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleEscape);
     }
 
     return () => {
@@ -160,6 +171,50 @@ const NavBar: React.FC<NavBarProps> = ({
               >
                 <Heart className="w-5 h-5 sm:w-6 sm:h-6" />
               </button>
+
+              {/* User Menu */}
+              {user ? (
+                <div className="relative" ref={userMenuRef}>
+                  <button
+                    onClick={() => setUserMenuOpen(!userMenuOpen)}
+                    className="p-2 text-slate-600 hover:text-slate-900 rounded-md transition-colors cursor-pointer flex items-center gap-2"
+                    aria-label="User menu"
+                  >
+                    <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+
+                  {userMenuOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-2 z-50">
+                      <div className="px-4 py-2 border-b border-slate-200">
+                        <p className="text-sm font-medium text-slate-900 truncate">
+                          {user.email}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          {user.user_metadata?.role || 'Client'}
+                        </p>
+                      </div>
+                      <button
+                        onClick={async () => {
+                          await logout();
+                          setUserMenuOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 flex items-center gap-2"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <button
+                  onClick={() => router.push('/auth')}
+                  className="p-2 text-slate-600 hover:text-slate-900 rounded-md transition-colors cursor-pointer"
+                  aria-label="Sign in"
+                >
+                  <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                </button>
+              )}
 
               <button
                 onClick={() => router.push('/cart')}
@@ -304,6 +359,50 @@ const NavBar: React.FC<NavBarProps> = ({
             </div>
 
             <div className="flex-1 overflow-y-auto py-6 px-4">
+              {/* User Section */}
+              {user && (
+                <div className="mb-6 p-4 bg-slate-50 rounded-lg">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="h-10 w-10 bg-slate-300 rounded-full flex items-center justify-center">
+                      <User className="w-5 h-5 text-slate-600" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">
+                        {user.email}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {user.user_metadata?.role || 'Client'}
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      await logout();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-md flex items-center justify-center gap-2 text-sm font-medium"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
+                </div>
+              )}
+
+              {!user && (
+                <div className="mb-6">
+                  <button
+                    onClick={() => {
+                      router.push('/auth');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-3 bg-black text-white rounded-md flex items-center justify-center gap-2 text-sm font-medium"
+                  >
+                    <User className="w-4 h-4" />
+                    Sign In
+                  </button>
+                </div>
+              )}
+
               <nav className="space-y-1">
                 {categories.map((category) => (
                   <Link

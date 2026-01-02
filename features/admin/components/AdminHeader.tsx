@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth';
 import '@/styles/admin-header.css';
 
 
@@ -27,6 +28,7 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
   const [searchValue, setSearchValue] = useState('');
   const pathname = usePathname();
   const pageTitle = pageTitles[pathname] || 'Admin Dashboard';
+  const { logout, user } = useAuth();
 
   return (
     <header className="admin-header">
@@ -154,9 +156,30 @@ export default function AdminHeader({ onMenuClick }: AdminHeaderProps) {
           </svg>
         </button>
 
+        {/* Logout Button */}
+        <button 
+          onClick={logout}
+          className="notification-button"
+          title="Logout"
+        >
+          <svg
+            className="notification-icon"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+            />
+          </svg>
+        </button>
+
         {/* Profile */}
-        <div className="profile-avatar">
-          K
+        <div className="profile-avatar" title={user?.email || 'Admin'}>
+          {user?.email?.[0].toUpperCase() || 'A'}
         </div>
       </div>
     </header>

@@ -5,6 +5,7 @@
 export { Button } from './button';
 export { CustomButton } from './custom-button';
 export { Input } from './input';
+export { LoadingSpinner } from './loading-spinner';
 export { StatusBadge, type StatusBadgeProps } from './status-badge';
 export { NumberInput, type NumberInputProps } from './number-input';
 export { ProductCard, type ProductCardProps } from './product-card';

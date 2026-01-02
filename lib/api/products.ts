@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { ProductInput } from '@/hooks/useProductsApi';
+import { supabase } from '@/lib/supabaseClient';
 
 // Create axios instance with base configuration
 const apiClient = axios.create({
@@ -7,6 +8,17 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+});
+
+// Add interceptor to include auth token in requests
+apiClient.interceptors.request.use(async (config) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (session?.access_token) {
+    config.headers.Authorization = `Bearer ${session.access_token}`;
+  }
+  
+  return config;
 });
 
 // Product API endpoints

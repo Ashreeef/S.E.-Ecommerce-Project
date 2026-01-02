@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { ProductGrid } from '@/components/ui/product-grid';
 import { ProductsToolbar } from '@/components/ui/products-toolbar';
 import { NavigationButtons } from '@/components/ui/navigation-buttons';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useFavorites } from '@/hooks/useFavorites';
 import { useProducts, Product as ApiProduct } from '@/hooks/useProductsApi';
 import { SortOption } from '@/components/ui/sort-control';
@@ -69,11 +70,7 @@ export default function ProductsPage() {
     }, [sortedProducts, currentPage]);
 
     if (isLoading) {
-        return (
-            <div className="container mx-auto px-4 py-8">
-                <div className="text-center">Loading products...</div>
-            </div>
-        );
+        return <LoadingSpinner fullScreen text="Loading products..." />;
     }
 
     if (isError) {

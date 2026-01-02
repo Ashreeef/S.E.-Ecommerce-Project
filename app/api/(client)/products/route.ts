@@ -1,6 +1,7 @@
 import { NextResponse, NextRequest } from 'next/server';
 import { supabase } from '@/lib/supabaseClient';
 import { supabaseServer } from '@/lib/supabaseServer';
+import { withAuth } from '@/lib/auth/apiAuth';
 
 export async function GET() {
   try {
@@ -32,8 +33,10 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  try {
-    const formData = await request.formData();
+  // Protect this route - only authenticated users can create products
+  return withAuth(request, async (user) => {
+    try {
+      const formData = await request.formData();
     
     // Extract fields from FormData
     const name = formData.get('name') as string;
@@ -128,4 +131,5 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+  });
 }

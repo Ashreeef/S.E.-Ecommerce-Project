@@ -2,15 +2,19 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import CustomButton from "@/components/ui/custom-button";
 import { Lock, Mail, AlertCircle, ShoppingBag, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
+import { isAdmin } from "@/lib/auth/roleUtils";
 
 type AuthView = 'login' | 'forgot';
 
 export default function AuthPage() {
     const router = useRouter();
+    const { login, resetPassword, user } = useAuth();
     const [view, setView] = useState<AuthView>('login');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -27,6 +31,14 @@ export default function AuthPage() {
     useEffect(() => {
         setMounted(true);
     }, []);
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user) {
+            const redirectPath = isAdmin(user) ? '/admin' : '/';
+            router.push(redirectPath);
+        }
+    }, [user, router]);
 
     // Clear messages when switching views
     useEffect(() => {
@@ -62,13 +74,18 @@ export default function AuthPage() {
         setError(null);
 
         try {
-            console.log("Login attempt:", loginData);
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            console.log("Login successful");
-            // router.push("/admin");
-            alert("Login successful!");
-        } catch {
-            setError("Invalid credentials. Please try again.");
+            const result = await login(loginData.email, loginData.password);
+            
+            if (!result.success) {
+                setError(result.error || "Login failed. Please try again.");
+                setLoading(false);
+                return;
+            }
+
+            // Redirect will happen automatically via useEffect based on user role
+        } catch (error) {
+            console.error('Login error:', error);
+            setError("An unexpected error occurred. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -90,11 +107,16 @@ export default function AuthPage() {
         setError(null);
 
         try {
-            console.log("Forgot password attempt:", forgotEmail);
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            setSuccess("If an account exists, a reset link has been sent.");
+            const result = await resetPassword(forgotEmail);
+            
+            if (!result.success) {
+                setError(result.error || "Failed to send reset email.");
+                return;
+            }
+
+            setSuccess("If an account exists, a reset link has been sent to your email.");
         } catch {
-            setError("An error occurred. Please try again.");
+            setError("An unexpected error occurred. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -179,14 +201,23 @@ export default function AuthPage() {
                                 />
                             </div>
 
-                            <div className="text-center">
+                            <div className="text-center space-y-3">
                                 <button
                                     type="button"
                                     onClick={() => setView('forgot')}
-                                    className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
+                                    className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors block w-full"
                                 >
                                     Forgot your password?
                                 </button>
+                                <p className="text-sm text-neutral-500">
+                                    Don&apos;t have an account?{' '}
+                                    <Link 
+                                        href="/signup" 
+                                        className="text-black font-semibold hover:underline transition-all"
+                                    >
+                                        Sign Up
+                                    </Link>
+                                </p>
                             </div>
                         </form>
                     ) : (
