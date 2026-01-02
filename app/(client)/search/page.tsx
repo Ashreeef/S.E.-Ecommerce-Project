@@ -6,7 +6,8 @@ import { ProductGrid } from '@/components/ui/product-grid';
 import { ProductsToolbar } from '@/components/ui/products-toolbar';
 import { NavigationButtons } from '@/components/ui/navigation-buttons';
 import { useFavorites } from '@/hooks/useFavorites';
-import { mockProducts } from '@/lib/mock-data';
+import { useProducts } from '@/hooks/useProducts';
+import { Product } from '@/lib/types/product';
 import { SortOption } from '@/components/ui/sort-control';
 
 function SearchResults() {
@@ -17,6 +18,7 @@ function SearchResults() {
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
   const { favorites, toggleFavorite } = useFavorites();
+  const { products: allProducts } = useProducts();
 
   // Reset page when query changes
   useEffect(() => {
@@ -24,21 +26,20 @@ function SearchResults() {
   }, [query]);
 
   const searchResults = useMemo(() => {
-    // TODO: Replace with actual backend API call
-    // const results = await fetch(`/api/search?q=${query}`).then(res => res.json());
+    if (!allProducts) return [];
 
     // For now: Filter products by title or description matching the query
     if (!query.trim()) {
-      return mockProducts;
+      return allProducts;
     }
 
     const searchLower = query.toLowerCase();
-    return mockProducts.filter(product =>
+    return allProducts.filter((product: Product) =>
       product.name.toLowerCase().includes(searchLower) ||
       product.description.toLowerCase().includes(searchLower) ||
       product.category.toLowerCase().includes(searchLower)
     );
-  }, [query]);
+  }, [query, allProducts]);
 
   const sortedProducts = useMemo(() => {
     const products = [...searchResults];

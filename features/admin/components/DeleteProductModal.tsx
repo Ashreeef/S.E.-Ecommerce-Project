@@ -7,6 +7,7 @@ import '@/styles/delete-modal.css';
 import useDeleteProduct from '@/hooks/useDeleteProduct';
 import useDeleteOrder from '@/hooks/useDeleteOrder';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 
 type ResourceType = 'product' | 'order';
 
@@ -26,6 +27,7 @@ export default function DeleteProductModal({
   onSuccess,
 }: DeleteProductModalProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [localLoading, setLocalLoading] = useState(false);
   const { isLoading: delProdLoading, deleteProduct } = useDeleteProduct();
   const { isLoading: delOrderLoading, deleteOrder } = useDeleteOrder();
@@ -74,14 +76,15 @@ export default function DeleteProductModal({
         } catch (e) {
           // ignore
         }
+        showToast(`${resourceType} deleted successfully`, 'success');
         onSuccess?.();
         onClose();
       } else {
-        alert('Failed to delete the item');
+        showToast(`Failed to delete the ${resourceType}`, 'error');
       }
     } catch (err) {
       console.error('Delete error', err);
-      alert('An error occurred while deleting');
+      showToast(`An error occurred while deleting the ${resourceType}`, 'error');
     } finally {
       setLocalLoading(false);
     }

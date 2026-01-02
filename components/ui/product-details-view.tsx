@@ -116,7 +116,7 @@ export function ProductDetailsView({
 
           {/* Category */}
           <span className="text-neutral-400 text-xs sm:text-sm font-normal">
-            {product.type} • {product.category}
+            {product.category}
           </span>
 
           {/* Title & Favorite */}
@@ -186,7 +186,7 @@ export function ProductDetailsView({
             max={10}
             className="w-32"
           />
-          
+
           <CustomButton
             variant="filled"
             text="Add to cart"

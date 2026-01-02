@@ -9,7 +9,10 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^(05|06|07)[0-9]{8}$/;
 
+import { useToast } from '@/context/ToastContext';
+
 export const useCheckoutForm = () => {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState<FormData>({
     firstName: '',
     lastName: '',
@@ -19,7 +22,6 @@ export const useCheckoutForm = () => {
     city: '',
     address: '',
     shippingMethod: '',
-    bureau: '',
     orderNotes: '',
   });
 
@@ -89,7 +91,6 @@ export const useCheckoutForm = () => {
       city: '',
       address: '',
       shippingMethod: '',
-      bureau: '',
       orderNotes: '',
     });
     setError('');
@@ -134,7 +135,6 @@ export const useCheckoutForm = () => {
           city: formData.city,
           address: formData.address,
           shippingMethod: formData.shippingMethod,
-          bureau: formData.bureau,
           orderNotes: formData.orderNotes
         })
       });
@@ -143,7 +143,7 @@ export const useCheckoutForm = () => {
 
       if (response.ok && data.success) {
         setOrderNumber(data.orderNumber);
-        alert(`تم تأكيد الطلب بنجاح! رقم الطلب: ${data.orderNumber} / Order confirmed! Order #: ${data.orderNumber}`);
+        showToast(`تم تأكيد الطلب بنجاح! رقم الطلب: ${data.orderNumber}`, "success");
         resetForm();
         return true;
       } else {

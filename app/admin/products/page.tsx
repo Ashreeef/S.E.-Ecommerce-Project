@@ -10,13 +10,15 @@ import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
 import { Plus, ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/products-list.css';
-import { Product } from '@/lib/types/product';
 import { useProducts } from '@/hooks/useProducts';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
+import { useToast } from '@/context/ToastContext';
+
 export default function ProductsPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedProducts, setSelectedProducts] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -27,7 +29,7 @@ export default function ProductsPage() {
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
   // Fetch products from API
-  const { products, isLoading, error, refresh } = useProducts();
+  const { products, isLoading, refresh } = useProducts();
 
   // Check login
   useEffect(() => {
@@ -78,14 +80,14 @@ export default function ProductsPage() {
       });
 
       if (response.ok) {
-        alert('Product deleted successfully');
+        showToast('Product deleted successfully', 'success');
         refresh();
       } else {
-        alert('Failed to delete product');
+        showToast('Failed to delete product', 'error');
       }
     } catch (e) {
       console.error(e);
-      alert('Error deleting product');
+      showToast('Error deleting product', 'error');
     } finally {
       setIsDeleting(false);
       setDeleteModalOpen(false);

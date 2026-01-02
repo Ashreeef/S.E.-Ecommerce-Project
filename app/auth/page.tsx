@@ -9,8 +9,11 @@ import { cn } from "@/lib/utils";
 
 type AuthView = 'login' | 'forgot';
 
+import { useToast } from "@/context/ToastContext";
+
 export default function AuthPage() {
     const router = useRouter();
+    const { showToast } = useToast();
     const [view, setView] = useState<AuthView>('login');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -65,8 +68,8 @@ export default function AuthPage() {
             console.log("Login attempt:", loginData);
             await new Promise((resolve) => setTimeout(resolve, 1500));
             console.log("Login successful");
-            // router.push("/admin");
-            alert("Login successful!");
+            showToast("Login successful!", "success");
+            router.push("/admin");
         } catch {
             setError("Invalid credentials. Please try again.");
         } finally {

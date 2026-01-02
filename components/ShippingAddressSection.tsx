@@ -1,8 +1,8 @@
 import React from 'react';
 import { Input } from '@/components/ui';
+import { DELIVERY_CITIES } from '@/lib/constants/delivery-cities';
 
 interface ShippingAddressSectionProps {
-  wilaya: string;
   setWilaya: (value: string) => void;
   city: string;
   setCity: (value: string) => void;
@@ -10,11 +10,7 @@ interface ShippingAddressSectionProps {
   setAddress: (value: string) => void;
   shippingMethod: string;
   setShippingMethod: (value: string) => void;
-  bureau: string;
-  setBureau: (value: string) => void;
 }
-
-const WILAYA_OPTIONS = ['Algiers', 'Oran', 'Constantine'];
 
 const SHIPPING_OPTIONS = [
   'التوصيل إلى المنزل / Livraison à domicile',
@@ -22,7 +18,6 @@ const SHIPPING_OPTIONS = [
 ];
 
 export const ShippingAddressSection: React.FC<ShippingAddressSectionProps> = ({
-  wilaya,
   setWilaya,
   city,
   setCity,
@@ -30,30 +25,28 @@ export const ShippingAddressSection: React.FC<ShippingAddressSectionProps> = ({
   setAddress,
   shippingMethod,
   setShippingMethod,
-  bureau,
-  setBureau,
 }) => {
   return (
     <div className="space-y-4 pt-6 border-t border-neutral-200">
       <h2 className="text-xl font-semibold text-neutral-900">Shipping Address</h2>
 
       <div className="space-y-4">
-        <Input
-          variant="list"
-          required
-          placeholder="الولاية / Wilaya"
-          options={WILAYA_OPTIONS}
-          value={wilaya}
-          onChange={setWilaya}
-          className="w-full"
-        />
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Input
+            variant="list"
             required
-            placeholder="المدينة / City"
+            placeholder="الولاية / Wilaya"
+            options={DELIVERY_CITIES.map(c => c.name)}
             value={city}
-            onChange={setCity}
+            onChange={(val) => {
+              setCity(val);
+              setWilaya(val);
+              const cityData = DELIVERY_CITIES.find(c => c.name === val);
+              // Auto reset shipping method if it was Yalidine but city doesn't support it
+              if (cityData && cityData.desk_delivery === null && shippingMethod.toLowerCase().includes('yalidine')) {
+                setShippingMethod(SHIPPING_OPTIONS[0]);
+              }
+            }}
             className="w-full"
           />
           <Input
@@ -69,20 +62,17 @@ export const ShippingAddressSection: React.FC<ShippingAddressSectionProps> = ({
           variant="list"
           required
           placeholder="طريقة الشحن / Shipping method"
-          options={SHIPPING_OPTIONS}
+          options={SHIPPING_OPTIONS.filter(opt => {
+            const cityData = DELIVERY_CITIES.find(c => c.name === city);
+            if (opt.toLowerCase().includes('yalidine') && cityData?.desk_delivery === null) {
+              return false;
+            }
+            return true;
+          })}
           value={shippingMethod}
           onChange={setShippingMethod}
           className="w-full"
         />
-
-        {shippingMethod.includes('yalidine') && (
-          <Input
-            placeholder="رقم المكتب / Bureau Number"
-            value={bureau}
-            onChange={setBureau}
-            className="w-full"
-          />
-        )}
       </div>
     </div>
   );

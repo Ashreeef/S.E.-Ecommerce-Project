@@ -34,13 +34,28 @@ export function useOrders() {
         return;
       }
 
-      const data = await res.json();
-
       if (!res.ok) {
-        const errorMsg = data.error || `Failed to fetch orders (${res.status})`;
-        const details = data.details ? ` (${data.details})` : '';
-        throw new Error(`${errorMsg}${details}`);
+        const text = await res.text();
+        let errorMsg = `Failed to fetch orders (${res.status})`;
+        try {
+          const errorData = JSON.parse(text);
+          errorMsg = errorData.error || errorMsg;
+          if (errorData.details) errorMsg += ` (${errorData.details})`;
+        } catch {
+          // If not JSON, use the status text if available
+          if (text) errorMsg += `: ${text.slice(0, 100)}`;
+        }
+        throw new Error(errorMsg);
       }
+
+      const text = await res.text();
+      if (!text) {
+        setOrders([]);
+        setError(null);
+        return;
+      }
+
+      const data = JSON.parse(text);
 
       console.log('Successfully fetched orders:', data.length);
       setOrders(data);
@@ -106,7 +121,14 @@ export function useOrder(orderId?: string) {
         }
       });
       if (!res.ok) throw new Error('Failed to fetch order');
-      const data: Order[] = await res.json();
+
+      const text = await res.text();
+      if (!text) {
+        setOrder(null);
+        return;
+      }
+
+      const data: Order[] = JSON.parse(text);
       const found = data.find(o => o.id === orderId);
       setOrder(found || null);
     } catch (err) {

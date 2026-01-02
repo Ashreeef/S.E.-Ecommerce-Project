@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { orders } from '@/lib/types/orders';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function useDeleteOrder() {
   const [isLoading, setIsLoading] = useState(false);
@@ -10,9 +11,14 @@ export default function useDeleteOrder() {
   async function deleteOrder(id: string) {
     setIsLoading(true);
     setError(null);
+    const token = localStorage.getItem('admin_token');
+
     try {
-      const res = await fetch(`/api/orders/${encodeURIComponent(id)}`, {
+      const res = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(id)}`, {
         method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
       });
 
       if (res.ok) {
@@ -20,17 +26,12 @@ export default function useDeleteOrder() {
         return true;
       }
 
-      // fallback: remove from mock orders
-      const idx = orders.findIndex(o => o.id === id);
-      if (idx !== -1) orders.splice(idx, 1);
-      setIsLoading(false);
-      return true;
+      const data = await res.json().catch(() => ({}));
+      throw new Error(data.error || 'Failed to delete order');
     } catch (err: any) {
-      const idx = orders.findIndex(o => o.id === id);
-      if (idx !== -1) orders.splice(idx, 1);
       setError(err instanceof Error ? err : new Error(String(err)));
       setIsLoading(false);
-      return true;
+      return false;
     }
   }
 

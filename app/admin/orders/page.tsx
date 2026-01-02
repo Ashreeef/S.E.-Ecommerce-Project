@@ -8,7 +8,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/orders-list.css';
-import { Order } from '@/lib/types/orders';
+import { BadgeState } from '@/components/ui/status-badge';
 import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
 import { useOrders } from '@/hooks/useOrders';
 
@@ -63,10 +63,13 @@ export default function OrdersPage() {
   };
 
   const filteredOrders = orders.filter(order => {
-    const name = order.customerName || '';
+    const firstName = order.customer_first_name || '';
+    const lastName = order.customer_last_name || '';
+    const name = `${firstName} ${lastName}`;
+    const orderNum = order.order_number || '';
     const id = order.id || '';
     const query = searchQuery.toLowerCase();
-    return name.toLowerCase().includes(query) || id.toLowerCase().includes(query);
+    return name.toLowerCase().includes(query) || id.toLowerCase().includes(query) || orderNum.toLowerCase().includes(query);
   });
 
   const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
@@ -175,7 +178,7 @@ export default function OrdersPage() {
             <div key={order.id} className="mobile-order-card border rounded mb-3 p-3 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">{order.customerName}</div>
+                  <div className="font-medium">{order.customer_first_name} {order.customer_last_name}</div>
                   <div className="text-xs text-neutral-400">{order.id}</div>
                 </div>
                 <button
@@ -190,9 +193,9 @@ export default function OrdersPage() {
               {expandedRows.includes(order.id) && (
                 <div className="mobile-order-details mt-3 text-sm text-neutral-600">
                   <div className="grid grid-cols-2 gap-2">
-                    <div><strong>Date</strong>: {new Date(order.datePurchased).toLocaleDateString()}</div>
-                    <div><strong>Total</strong>: {order.grandTotal.toFixed(2)} DZD</div>
-                    <div><strong>Items</strong>: {order.numberOfProducts}</div>
+                    <div><strong>Date</strong>: {new Date(order.created_at).toLocaleDateString()}</div>
+                    <div><strong>Total</strong>: {(order.total || 0).toFixed(2)} DZD</div>
+                    <div><strong>Items</strong>: {order.items?.length || 0}</div>
                     <div><strong>Address</strong>: {order.address}</div>
                     <div className="col-span-2">
                       <StatusBadge state={mapStatusToBadge(order.status)} />
@@ -227,6 +230,7 @@ export default function OrdersPage() {
               <th className="orders-table-header">Date</th>
               <th className="orders-table-header">Total</th>
               <th className="orders-table-header">Items</th>
+              <th className="orders-table-header">Wilaya</th>
               <th className="orders-table-header">Address</th>
               <th className="orders-table-header">Status</th>
               <th className="orders-table-header">Actions</th>
@@ -235,7 +239,7 @@ export default function OrdersPage() {
           <tbody>
             {paginatedOrders.length === 0 ? (
               <tr>
-                <td colSpan={9} className="orders-table-empty">
+                <td colSpan={10} className="orders-table-empty">
                   No orders found
                 </td>
               </tr>
@@ -252,16 +256,31 @@ export default function OrdersPage() {
                   </td>
                   <td className="orders-table-cell">
                     <div className="orders-name-cell">
-                      <span className="orders-id">{order.id}</span>
+                      <span className="orders-id font-medium">{order.order_number || order.id.substring(0, 8)}</span>
                     </div>
                   </td>
-                  <td className="orders-table-cell">{order.customerName}</td>
-                  <td className="orders-table-cell">{new Date(order.datePurchased).toLocaleDateString()}</td>
-                  <td className="orders-table-cell">{(order.grandTotal || 0).toFixed(2)} DZD</td>
-                  <td className="orders-table-cell">{order.numberOfProducts}</td>
-                  <td className="orders-table-cell">{order.address}</td>
                   <td className="orders-table-cell">
-                    <StatusBadge state={mapStatusToBadge(order.status)} />
+                    {order.customer_first_name} {order.customer_last_name}
+                  </td>
+                  <td className="orders-table-cell text-sm">
+                    {new Date(order.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="orders-table-cell font-semibold">
+                    {(order.total || 0).toFixed(2)} DA
+                  </td>
+                  <td className="orders-table-cell">
+                    {order.items?.length || 0}
+                  </td>
+                  <td className="orders-table-cell">
+                    <span className="px-2 py-1 bg-neutral-100 rounded text-xs font-medium">
+                      {order.wilaya}
+                    </span>
+                  </td>
+                  <td className="orders-table-cell text-xs text-neutral-500 max-w-[150px] truncate">
+                    {order.address}
+                  </td>
+                  <td className="orders-table-cell">
+                    <StatusBadge state={order.status?.toLowerCase() as BadgeState} />
                   </td>
                   <td className="orders-table-cell orders-actions-cell">
                     <button
@@ -346,7 +365,7 @@ export default function OrdersPage() {
           onSuccess={() => {
             setDeleteModalOpen(false);
             setProductToDelete(null);
-            alert('Order deleted successfully (Not implemented in API yet)');
+            refresh();
           }}
         />
       )}

@@ -264,7 +264,7 @@ const NavBar: React.FC<NavBarProps> = ({
       </nav>
 
       {/* Mobile Menu */}
-      <div  
+      <div
         className={cn(
           "fixed inset-0 z-50 md:hidden",
           mobileMenuOpen ? "pointer-events-auto" : "pointer-events-none"
@@ -277,7 +277,7 @@ const NavBar: React.FC<NavBarProps> = ({
           )}
           onClick={() => setMobileMenuOpen(false)}
         />
-        
+
         <div
           className={cn(
             "absolute left-0 top-0 bottom-0 w-80 bg-white shadow-2xl transition-transform duration-300",

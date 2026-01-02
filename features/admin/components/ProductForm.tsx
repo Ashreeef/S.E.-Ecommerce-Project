@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/context/ToastContext';
 import { Input } from '@/components/ui/input';
 import { CustomButton } from '@/components/ui/custom-button';
 import { NumberInput } from '@/components/ui/number-input';
@@ -19,10 +20,11 @@ const COLORS = [
   { name: 'White', value: 'white', hex: '#FFFFFF' },
   { name: 'Brown', value: 'brown', hex: '#8B4513' },
   { name: 'Blue', value: 'blue', hex: '#0000FF' },
-  { name: 'Dark Blue', value: 'dark-blue', hex: '#00008B' },
+  { name: 'Dark Blue', value: 'dark-blue', hex: '#010321' },
+  { name: 'Gray', value: 'gray', hex: '#808080' },
+  { name: 'Yellow', value: 'yellow', hex: '#FFFF00' },
 ];
-const CATEGORIES = ['Jeans', 'Shirts', 'Polos', 'Jackets', 'Trousers', 'Sweaters'];
-const FITS = ['Baggy', 'Slim', 'Regular', 'Oversized', 'Relaxed'];
+const CATEGORIES = ['Chemises', 'Jupes', 'Hijeb', 'Ensemble', 'Jackets', 'Robes'];
 const STATUS_OPTIONS = ['Available', 'Unavailable', 'Draft'];
 const DISCOUNT_TYPES = ['Back to school', 'Seasonal', 'Clearance', 'Flash sale', 'New customer'];
 
@@ -34,6 +36,7 @@ interface ProductFormProps {
 
 export default function ProductForm({ productId, initialData, isEdit = false }: ProductFormProps) {
   const router = useRouter();
+  const { showToast } = useToast();
   const {
     formData,
     updateField,
@@ -69,9 +72,7 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
         originalPrice: (source as any).originalPrice,
         image: (source as any).image || '',
         color: (source as any).color || '',
-        gender: (source as any).gender || 'UNISEX',
         category: (source as any).category || '',
-        fit: (source as any).fit || '',
         stock: (source as any).stock || 0,
         discount: (source as any).discount || 0,
         discountType: (source as any).discountType || '',
@@ -117,19 +118,19 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
   const handleSaveDraft = async () => {
     const result = await submitForm(true, isEdit, productId);
     if (result.success) {
-      alert('Draft saved successfully!');
+      showToast('Draft saved successfully!', 'success');
     } else {
-      alert(`Error: ${result.error}`);
+      showToast(`Error: ${result.error}`, 'error');
     }
   };
 
   const handleSubmit = async () => {
     const result = await submitForm(false, isEdit, productId);
     if (result.success) {
-      alert(isEdit ? 'Product updated successfully!' : 'Product added successfully!');
+      showToast(isEdit ? 'Product updated successfully!' : 'Product added successfully!', 'success');
       router.push('/admin/products');
     } else {
-      alert(`Error: ${result.error}`);
+      showToast(`Error: ${result.error}`, 'error');
     }
   };
 
@@ -342,8 +343,8 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
                         }
                       }}
                       className={`product-color-swatch ${isSelected
-                          ? 'product-color-swatch-selected'
-                          : 'product-color-swatch-default'
+                        ? 'product-color-swatch-selected'
+                        : 'product-color-swatch-default'
                         }`}
                       style={{ backgroundColor: color.hex }}
                       title={color.name}
@@ -356,27 +357,6 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
               </p>
             </div>
 
-            {/* Gender */}
-            <div>
-              <label className="product-form-label">
-                Gender
-              </label>
-              <div className="product-gender-selector">
-                {(['MEN', 'WOMEN', 'UNISEX'] as const).map((gender) => (
-                  <button
-                    key={gender}
-                    type="button"
-                    onClick={() => updateField('gender', gender)}
-                    className={`product-gender-button ${formData.gender === gender
-                        ? 'product-gender-button-selected'
-                        : 'product-gender-button-default'
-                      }`}
-                  >
-                    {gender}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Category */}
             <div>
@@ -392,17 +372,6 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
               />
             </div>
 
-            {/* Fit */}
-            <div>
-              <Input
-                label="Fit"
-                variant="list"
-                value={formData.fit}
-                onChange={(value) => updateField('fit', value)}
-                options={FITS}
-                placeholder="Select fit"
-              />
-            </div>
 
             {/* Price */}
             <div>

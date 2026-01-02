@@ -23,8 +23,8 @@ export default function CheckoutPage() {
     calculateTotal,
   } = useCart();
 
-  const shippingCost = calculateShippingCost(formData.shippingMethod);
-  const total = calculateTotal(formData.shippingMethod);
+  const shippingCost = calculateShippingCost(formData.city, formData.shippingMethod);
+  const total = calculateTotal(formData.city, formData.shippingMethod);
 
   const handleSubmit = () => {
     submitForm(cartItems, total);
@@ -62,7 +62,6 @@ export default function CheckoutPage() {
             />
 
             <ShippingAddressSection
-              wilaya={formData.wilaya}
               setWilaya={(value) => updateField('wilaya', value)}
               city={formData.city}
               setCity={(value) => updateField('city', value)}
@@ -70,8 +69,6 @@ export default function CheckoutPage() {
               setAddress={(value) => updateField('address', value)}
               shippingMethod={formData.shippingMethod}
               setShippingMethod={(value) => updateField('shippingMethod', value)}
-              bureau={formData.bureau}
-              setBureau={(value) => updateField('bureau', value)}
             />
 
             <AdditionalInfoSection

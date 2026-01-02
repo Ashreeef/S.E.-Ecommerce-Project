@@ -37,11 +37,9 @@ const initialFormData: ProductFormData = {
   description: '',
   isAvailable: true,
   color: '',
-  gender: 'UNISEX',
   stock: 0,
   discount: 0,
   discountType: '',
-  fit: '',
   modelDetails: '',
 };
 
@@ -92,6 +90,15 @@ export function useProductForm(): UseProductFormReturn {
     if (!formData.category) {
       newErrors.category = 'Category is required';
     }
+
+    // Size validation: Either 'Standard' or a list, but not both
+    const sizes = formData.availableSizes.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
+    if (sizes.length === 0) {
+      newErrors.availableSizes = 'At least one size or "Standard" is required';
+    } else if (sizes.includes('standard') && sizes.length > 1) {
+      newErrors.availableSizes = '"Standard" cannot be mixed with other sizes';
+    }
+
     if (formData.price <= 0) {
       newErrors.price = 'Price must be greater than 0';
     }
@@ -156,13 +163,11 @@ export function useProductForm(): UseProductFormReturn {
         category: formData.category,
         image: newImageUrls[0] || formData.image, // Main image
         images: newImageUrls.map((url, i) => ({ id: `img-${i}`, url, alt: formData.name })),
-        gender: formData.gender,
         stock: formData.stock,
         color: formData.color,
         availableColors: formData.availableColors,
         isAvailable: formData.isAvailable,
         status: formData.isAvailable ? 'Available' : 'Out-of-stock',
-        fit: formData.fit,
         modelDetails: formData.modelDetails,
         discount: formData.discount,
         discountType: formData.discountType,

@@ -4,8 +4,8 @@ import type { CartItem as CartItemType } from '@/types/checkout';
 
 interface OrderSummaryProps {
   cartItems: CartItemType[];
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  removeItem: (id: string | number) => void;
+  updateQuantity: (id: string | number, quantity: number) => void;
   subtotal: number;
   shippingCost: number;
   total: number;

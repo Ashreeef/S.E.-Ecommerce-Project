@@ -4,16 +4,6 @@ import { ArrowRight, Star } from 'lucide-react';
 import { CustomButton } from '@/components/ui';
 import { useProducts } from '@/hooks/useProducts';
 
-interface Product {
-  id: string;
-  name: string;
-  price: number;
-  originalPrice?: number;
-  rating: number;
-  reviews: number;
-  image: string;
-  badge?: string;
-}
 
 interface FeaturedProductsSectionProps {
   onViewProduct?: (productId: string) => void;
@@ -36,7 +26,7 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
       price: p.price,
       originalPrice: p.originalPrice,
       rating: p.rating || 5,
-      reviews: (p as any).reviewCount || Math.floor(Math.random() * 100) + 10,
+      reviews: p.reviewCount || Math.floor(Math.random() * 100) + 10,
       image: p.image,
       badge: p.discount ? `${p.discount}% OFF` : undefined
     }));

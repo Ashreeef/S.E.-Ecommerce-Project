@@ -1,14 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
-import ProductForm from '@/features/admin/components/ProductForm';
-import { Product } from '@/lib/types/product';
-import { ProductFormData } from '@/hooks/useProductForm';
 import { useProduct } from '@/hooks/useProducts';
-
-
-
+import { ProductFormData } from '@/hooks/useProductForm';
+import ProductForm from '@/features/admin/components/ProductForm';
 
 export default function EditProductPage() {
   const params = useParams();
@@ -53,11 +48,10 @@ export default function EditProductPage() {
     discount: product.discount || 0,
     discountType: product.discountType || '',
     images: [],
-    imageUrls: Array.isArray(product.images) 
+    imageUrls: Array.isArray(product.images)
       ? product.images.map(img => typeof img === 'string' ? img : img.url)
       : (product.image ? [product.image] : []),
   };
 
   return <ProductForm productId={productId} initialData={initialData} isEdit={true} />;
 }
-

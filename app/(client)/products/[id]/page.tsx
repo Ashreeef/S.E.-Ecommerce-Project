@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useMemo, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import React, { useMemo } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { ProductDetailsView } from '@/components/ui/product-details-view';
 import { ProductGrid } from '@/components/ui/product-grid';
@@ -11,7 +11,6 @@ import { useCart } from '@/hooks/useCart';
 
 export default function ProductDetailPage() {
   const params = useParams();
-  const router = useRouter();
   const productId = params.id as string;
   const { favorites, toggleFavorite } = useFavorites();
   const { addItem } = useCart();
@@ -27,14 +26,14 @@ export default function ProductDetailPage() {
       id: apiProduct.id,
       name: apiProduct.name,
       category: apiProduct.category,
-      type: (apiProduct as any).gender || 'Fashion',
+      type: apiProduct.gender || 'Fashion',
       isAvailable: apiProduct.isAvailable,
       rating: apiProduct.rating || 5,
-      reviewCount: (apiProduct as any).reviewCount || 0,
+      reviewCount: apiProduct.reviewCount || 0,
       price: apiProduct.price,
       originalPrice: apiProduct.originalPrice,
       images: apiProduct.images && apiProduct.images.length > 0
-        ? apiProduct.images.map((img: any, idx: number) => ({
+        ? apiProduct.images.map((img: { id?: string; url: string; alt?: string } | string, idx: number) => ({
           id: typeof img === 'string' ? `${apiProduct.id}-${idx}` : (img.id || `${apiProduct.id}-${idx}`),
           url: typeof img === 'string' ? img : img.url,
           alt: typeof img === 'string' ? apiProduct.name : (img.alt || apiProduct.name)

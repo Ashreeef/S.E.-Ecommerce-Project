@@ -24,7 +24,13 @@ export function useProduct(productId?: string) {
         setIsLoading(false);
         return;
       }
-      const data = await res.json();
+      const text = await res.text();
+      if (!text) {
+        setProduct(null);
+        setIsLoading(false);
+        return;
+      }
+      const data = JSON.parse(text);
       setProduct(data as Product);
     } catch (err) {
       const local = mockProducts.find(p => p.id === id) || null;
@@ -46,7 +52,7 @@ export function useProduct(productId?: string) {
 }
 
 // Hook for fetching all products
-export function useProducts() {
+export function useProducts(category?: string) {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -66,7 +72,13 @@ export function useProducts() {
         setIsLoading(false);
         return;
       }
-      const data = await res.json();
+      const text = await res.text();
+      if (!text) {
+        setProducts([]);
+        setIsLoading(false);
+        return;
+      }
+      const data = JSON.parse(text);
       setProducts(data as Product[]);
     } catch (err) {
       console.error('Failed to fetch products:', err);
@@ -79,8 +91,8 @@ export function useProducts() {
   }, []);
 
   useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    fetchProducts(category);
+  }, [fetchProducts, category]);
 
   const refresh = () => {
     fetchProducts();

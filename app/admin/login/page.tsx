@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CustomButton } from '@/components/ui/custom-button';
-import { Input } from '@/components/ui/input';
 import { Lock, Mail, AlertCircle } from 'lucide-react';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -46,7 +45,7 @@ export default function AdminLoginPage() {
             } else {
                 setError(data.error || 'Invalid credentials');
             }
-        } catch (err) {
+        } catch {
             setError('Connection refused. Is the backend running?');
         } finally {
             setIsLoading(false);

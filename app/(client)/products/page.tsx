@@ -1,21 +1,25 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, Suspense } from 'react';
 import { ProductGrid } from '@/components/ui/product-grid';
 import { ProductsToolbar } from '@/components/ui/products-toolbar';
 import { NavigationButtons } from '@/components/ui/navigation-buttons';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useSearchParams } from 'next/navigation';
 import { useProducts } from '@/hooks/useProducts';
 import { SortOption } from '@/components/ui/sort-control';
 
-export default function ProductsPage() {
+function SearchableProducts() {
+    const searchParams = useSearchParams();
+    const category = searchParams.get('category') || undefined;
+
     const [sortOption, setSortOption] = useState<SortOption>('default');
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 12;
     const { favorites, toggleFavorite } = useFavorites();
 
-    // Fetch products from API
-    const { products, isLoading, error } = useProducts();
+    // Fetch products from API with category filter
+    const { products, isLoading, error } = useProducts(category);
 
     const sortedProducts = useMemo(() => {
         const productsCopy = [...products];
@@ -82,5 +86,19 @@ export default function ProductsPage() {
                 </div>
             )}
         </div>
+    );
+}
+
+export default function ProductsPage() {
+    return (
+        <Suspense fallback={
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="flex justify-center items-center min-h-[400px]">
+                    <div className="text-lg text-neutral-500">Loading products...</div>
+                </div>
+            </div>
+        }>
+            <SearchableProducts />
+        </Suspense>
     );
 }

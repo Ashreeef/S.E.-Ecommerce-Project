@@ -1,5 +1,5 @@
 export interface CartItem {
-  id: number;
+  id: string | number;
   name: string;
   size: string;
   color: string;
@@ -18,7 +18,6 @@ export interface FormData {
   city: string;
   address: string;
   shippingMethod: string;
-  bureau: string;
   orderNotes: string;
 }
 

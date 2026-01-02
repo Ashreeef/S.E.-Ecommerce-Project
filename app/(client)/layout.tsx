@@ -3,6 +3,12 @@
 import React from 'react';
 import { NavBar } from '@/components/ui';
 import { Footer } from '@/components/ui/footer';
+import { CartProvider, useCartContext } from '@/context/CartContext';
+
+function NavBarWithCart() {
+  const { itemCount } = useCartContext();
+  return <NavBar cartItemCount={itemCount} />;
+}
 
 export default function ClientLayout({
   children,
@@ -10,14 +16,16 @@ export default function ClientLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen flex flex-col bg-white">
-      <NavBar />
-      
-      <main className="flex-grow">
-        {children}
-      </main>
-      
-      <Footer />
-    </div>
+    <CartProvider>
+      <div className="min-h-screen flex flex-col bg-white">
+        <NavBarWithCart />
+
+        <main className="flex-grow">
+          {children}
+        </main>
+
+        <Footer />
+      </div>
+    </CartProvider>
   );
 }

@@ -6,17 +6,21 @@ import { ProductGrid } from '@/components/ui/product-grid';
 import { FavoritesToolbar } from '@/components/ui/favorites-toolbar';
 import { NavigationButtons } from '@/components/ui/navigation-buttons';
 import { useFavorites } from '@/hooks/useFavorites';
-import { mockProducts } from '@/lib/mock-data';
+import { useProducts } from '@/hooks/useProducts';
+import { Product } from '@/lib/types/product';
 
 export default function FavoritesPage() {
     const router = useRouter();
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 12;
-    const { favorites, toggleFavorite, isLoaded } = useFavorites();
+    const { favorites, toggleFavorite, isLoaded: favoritesLoaded } = useFavorites();
+    const { products: allProducts, isLoading: productsLoading } = useProducts();
+
+    const isLoaded = favoritesLoaded && !productsLoading;
 
     const favoriteProducts = useMemo(() => {
-        return mockProducts.filter(product => favorites.includes(product.id));
-    }, [favorites]);
+        return allProducts.filter((product: Product) => favorites.includes(product.id));
+    }, [favorites, allProducts]);
 
     const totalPages = Math.ceil(favoriteProducts.length / productsPerPage);
     const paginatedProducts = useMemo(() => {
@@ -43,7 +47,7 @@ export default function FavoritesPage() {
                 </div>
             ) : (
                 <>
-                    <ProductGrid 
+                    <ProductGrid
                         products={paginatedProducts}
                         favoriteIds={favorites}
                         onFavoriteToggle={toggleFavorite}

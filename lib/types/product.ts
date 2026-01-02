@@ -32,14 +32,14 @@ export interface Product {
   status: 'Available' | 'Out-of-stock';
   color?: string;
   availableColors: Array<{ name: string; hex: string }>; // available colors
-  gender: 'MEN' | 'WOMEN' | 'UNISEX';
   stock: number; // QTY
   discount?: number; // percentage
   discountType?: string;
   date: string; // date of creation
   sales: number;
-  fit?: string; // type of fit like slim, regular, etc.
-  reviewCount?: number; 
+  reviewCount?: number;
+  gender?: string;
+  fit?: string;
 }
 
 export const products: Product[] = [
@@ -67,13 +67,11 @@ export const products: Product[] = [
       { name: "Dark Blue", hex: "#0A1F44" },
       { name: "Black", hex: "#000000" },
     ],
-    gender: "UNISEX",
     stock: 25,
     discount: 25,
     discountType: "percentage",
     date: "2025-01-15",
     sales: 120,
-    fit: "Regular",
     reviewCount: 42,
   },
   {
@@ -98,13 +96,11 @@ export const products: Product[] = [
       { name: "White", hex: "#FFFFFF" },
       { name: "Grey", hex: "#8E8E8E" },
     ],
-    gender: "MEN",
     stock: 40,
     discount: 15,
     discountType: "percentage",
     date: "2025-02-02",
     sales: 90,
-    fit: "Oversized",
     reviewCount: 63,
   },
   {
@@ -123,7 +119,6 @@ export const products: Product[] = [
     description: "Lightweight floral-print dress ideal for summer outings.",
     isAvailable: true,
     rating: 4.7,
-    gender: "WOMEN",
     color: "Pink",
     availableColors: [
       { name: "Pink", hex: "#F9A8D4" },
@@ -134,7 +129,6 @@ export const products: Product[] = [
     discountType: "percentage",
     date: "2025-01-25",
     sales: 50,
-    fit: "Regular",
     reviewCount: 30,
   },
   {
@@ -152,7 +146,6 @@ export const products: Product[] = [
     description: "Minimalist white sneakers suitable for all outfits.",
     isAvailable: false,
     rating: 4.6,
-    gender: "UNISEX",
     color: "White",
     availableColors: [
       { name: "White", hex: "#FFFFFF" },
@@ -179,7 +172,6 @@ export const products: Product[] = [
     description: "Lightweight floral-print dress ideal for summer outings.",
     isAvailable: true,
     rating: 4.7,
-    gender: "WOMEN",
     color: "Pink",
     availableColors: [
       { name: "Pink", hex: "#F9A8D4" },
@@ -190,7 +182,6 @@ export const products: Product[] = [
     discountType: "percentage",
     date: "2025-01-25",
     sales: 50,
-    fit: "Regular",
     reviewCount: 30,
   },
   {
@@ -208,7 +199,6 @@ export const products: Product[] = [
     description: "Minimalist white sneakers suitable for all outfits.",
     isAvailable: false,
     rating: 4.6,
-    gender: "UNISEX",
     color: "White",
     availableColors: [
       { name: "White", hex: "#FFFFFF" },
@@ -235,7 +225,6 @@ export const products: Product[] = [
     description: "Lightweight floral-print dress ideal for summer outings.",
     isAvailable: true,
     rating: 4.7,
-    gender: "WOMEN",
     color: "Pink",
     availableColors: [
       { name: "Pink", hex: "#F9A8D4" },
@@ -246,7 +235,6 @@ export const products: Product[] = [
     discountType: "percentage",
     date: "2025-01-25",
     sales: 50,
-    fit: "Regular",
     reviewCount: 30,
   },
   {
@@ -264,7 +252,6 @@ export const products: Product[] = [
     description: "Minimalist white sneakers suitable for all outfits.",
     isAvailable: false,
     rating: 4.6,
-    gender: "UNISEX",
     color: "White",
     availableColors: [
       { name: "White", hex: "#FFFFFF" },
@@ -291,7 +278,6 @@ export const products: Product[] = [
     description: "Lightweight floral-print dress ideal for summer outings.",
     isAvailable: true,
     rating: 4.7,
-    gender: "WOMEN",
     color: "Pink",
     availableColors: [
       { name: "Pink", hex: "#F9A8D4" },
@@ -302,7 +288,6 @@ export const products: Product[] = [
     discountType: "percentage",
     date: "2025-01-25",
     sales: 50,
-    fit: "Regular",
     reviewCount: 30,
   },
   {
@@ -320,7 +305,6 @@ export const products: Product[] = [
     description: "Minimalist white sneakers suitable for all outfits.",
     isAvailable: false,
     rating: 4.6,
-    gender: "UNISEX",
     color: "White",
     availableColors: [
       { name: "White", hex: "#FFFFFF" },

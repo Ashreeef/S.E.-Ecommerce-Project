@@ -1,4 +1,4 @@
- 'use client';
+'use client';
 
 import { useState } from 'react';
 import '@/styles/settings.css';
@@ -27,13 +27,13 @@ const SecurityToggle: React.FC<SecurityToggleProps> = ({
           {description}
         </p>
       </div>
-      
+
       <label className="toggle-switch-label">
         <input
           type="checkbox"
           checked={isEnabled}
           onChange={onToggle}
-          className="sr-only" 
+          className="sr-only"
         />
         <span className={`toggle-track ${isEnabled ? 'toggle-track-on' : 'toggle-track-off'}`}>
           <span className={`toggle-thumb ${isEnabled ? 'toggle-thumb-on' : 'toggle-thumb-off'}`}>
@@ -44,12 +44,15 @@ const SecurityToggle: React.FC<SecurityToggleProps> = ({
   );
 };
 
+import { useToast } from '@/context/ToastContext';
+
 export default function SecurityTab() {
+  const { showToast } = useToast();
   const [formData, setFormData] = useState({
     email: 'email@email.com',
-    password: '••••••••••••', 
+    password: '••••••••••••',
   });
-  const [is2FAGlobalEnabled, setIs2FAGlobalEnabled] = useState(true); 
+  const [is2FAGlobalEnabled, setIs2FAGlobalEnabled] = useState(true);
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -60,10 +63,11 @@ export default function SecurityTab() {
 
   const handle2FAToggle = () => {
     setIs2FAGlobalEnabled(!is2FAGlobalEnabled);
+    showToast(`2FA is now ${!is2FAGlobalEnabled ? 'enabled' : 'disabled'}`, 'info');
   };
-  
-  const handleChangeEmail = () => alert('Change Email clicked!');
-  const handleChangePassword = () => alert('Change Password clicked!');
+
+  const handleChangeEmail = () => showToast('Feature to change email is coming soon!', 'info');
+  const handleChangePassword = () => showToast('Feature to change password is coming soon!', 'info');
 
   return (
     <div className="settings-section">
@@ -71,7 +75,7 @@ export default function SecurityTab() {
         <h2 className="security-main-title">
           Security settings
         </h2>
-        
+
         <div className="security-item field-action-container">
           <div className="form-field security-input-wrapper">
             <label className="form-label security-label">
@@ -82,11 +86,11 @@ export default function SecurityTab() {
               name="email"
               value={formData.email}
               onChange={handleFormChange}
-              className="form-input security-input" 
+              className="form-input security-input"
             />
           </div>
-          <button 
-            onClick={handleChangeEmail} 
+          <button
+            onClick={handleChangeEmail}
             className="security-action-button"
           >
             Change email
@@ -103,12 +107,12 @@ export default function SecurityTab() {
               name="password"
               value={formData.password}
               onChange={handleFormChange}
-              className="form-input security-input" 
+              className="form-input security-input"
               readOnly
             />
           </div>
-          <button 
-            onClick={handleChangePassword} 
+          <button
+            onClick={handleChangePassword}
             className="security-action-button"
           >
             Change password
