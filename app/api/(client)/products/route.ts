@@ -34,7 +34,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   // Protect this route - only authenticated users can create products
-  return withAuth(request, async (user) => {
+  return withAuth(request, async (_user) => {
     try {
       const formData = await request.formData();
     
