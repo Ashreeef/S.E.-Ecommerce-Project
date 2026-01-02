@@ -1,72 +1,92 @@
 "use client";
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { ProductDetailsView } from '@/components/ui/product-details-view';
 import { ProductGrid } from '@/components/ui/product-grid';
 import { useFavorites } from '@/hooks/useFavorites';
-import { mockProducts } from '@/lib/mock-data';
-import { mapColorsToHex } from '@/lib/color-utils';
+import { useProduct, useProducts } from '@/hooks/useProducts';
+import { useCart } from '@/hooks/useCart';
 
 export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const productId = params.id as string;
   const { favorites, toggleFavorite } = useFavorites();
+  const { addItem } = useCart();
+
+  const { product: apiProduct, isLoading, error } = useProduct(productId);
+  const { products: allProducts } = useProducts();
 
   const product = useMemo(() => {
-    const foundProduct = mockProducts.find(p => p.id === productId);
-    if (!foundProduct) return null;
+    if (!apiProduct) return null;
 
+    // Map API product to view model
     return {
-      id: foundProduct.id,
-      name: foundProduct.title,
-      category: foundProduct.category,
-      type: 'Fashion',
-      isAvailable: foundProduct.availability,
-      rating: foundProduct.rating,
-      reviewCount: 435,
-      price: foundProduct.price,
-      originalPrice: foundProduct.originalPrice,
-      images: [
-        { id: `${foundProduct.id}-1`, url: foundProduct.image, alt: foundProduct.title },
-        { id: `${foundProduct.id}-2`, url: foundProduct.image, alt: `${foundProduct.title} - 2` },
-        { id: `${foundProduct.id}-3`, url: foundProduct.image, alt: `${foundProduct.title} - 3` },
-        { id: `${foundProduct.id}-4`, url: foundProduct.image, alt: `${foundProduct.title} - 4` },
-      ],
-      availableSizes: foundProduct.size,
-      availableColors: mapColorsToHex(foundProduct.colors || ['Black', 'White', 'Gray']),
-      description: foundProduct.description,
-      fit: 'Regular fit - true to size',
+      id: apiProduct.id,
+      name: apiProduct.name,
+      category: apiProduct.category,
+      type: (apiProduct as any).gender || 'Fashion',
+      isAvailable: apiProduct.isAvailable,
+      rating: apiProduct.rating || 5,
+      reviewCount: (apiProduct as any).reviewCount || 0,
+      price: apiProduct.price,
+      originalPrice: apiProduct.originalPrice,
+      images: apiProduct.images && apiProduct.images.length > 0
+        ? apiProduct.images.map((img: any, idx: number) => ({
+          id: typeof img === 'string' ? `${apiProduct.id}-${idx}` : (img.id || `${apiProduct.id}-${idx}`),
+          url: typeof img === 'string' ? img : img.url,
+          alt: typeof img === 'string' ? apiProduct.name : (img.alt || apiProduct.name)
+        }))
+        : [{ id: `${apiProduct.id}-main`, url: apiProduct.image, alt: apiProduct.name }],
+      availableSizes: apiProduct.availableSizes || [],
+      availableColors: apiProduct.availableColors || [],
+      description: apiProduct.description,
+      fit: apiProduct.fit || 'Regular fit - true to size',
       materials: 'Premium cotton blend. Machine wash cold. Tumble dry low.',
       delivery: 'Free shipping on orders over 10,000 DZD. Standard delivery 3-5 business days.',
     };
-  }, [productId]);
+  }, [apiProduct]);
 
-  // Related products: randomly select 4 products excluding the current one
+  // Related products: items from same category excluding current one
   const relatedProducts = useMemo(() => {
-    return mockProducts
-      .filter(p => p.id !== productId)
-      .sort(() => Math.random() - 0.5)
+    if (!apiProduct || !allProducts) return [];
+    return allProducts
+      .filter(p => p.id !== productId && p.category === apiProduct.category)
       .slice(0, 4);
-  }, [productId]);
+  }, [apiProduct, allProducts, productId]);
 
-  const handleAddToCart = (options: { size: string; color: string; quantity: number }) => {
-    console.log('Add to cart:', { productId, ...options });
+  const handleAddToCart = async (options: { size: string; color: string; quantity: number }) => {
+    try {
+      await addItem(productId, options.size, options.color, options.quantity);
+    } catch (err) {
+      console.error('Error adding to cart:', err);
+    }
   };
 
-  if (!product) {
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-16 text-center">
+        <p className="text-lg text-neutral-500">Loading product details...</p>
+      </div>
+    );
+  }
+
+  if (error || !product) {
     return (
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-neutral-900 mb-4">Product Not Found</h1>
-          <button
-            onClick={() => router.push('/products')}
+          <h1 className="text-2xl font-bold text-neutral-900 mb-4">
+            {error ? 'Error loading product' : 'Product Not Found'}
+          </h1>
+          <p className="mb-8 text-neutral-500">{error}</p>
+          <Link
+            href="/products"
             className="text-neutral-600 hover:text-neutral-900 underline"
           >
             Return to Products
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -82,26 +102,28 @@ export default function ProductDetailPage() {
       />
 
       {/* Related Products Section */}
-      <section className="mt-16 sm:mt-20 lg:mt-24">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 italic">
-            You might also like
-          </h2>
-          <Link
-            href="/products"
-            className="text-neutral-600 hover:text-neutral-900 text-sm sm:text-base font-medium transition-colors"
-          >
-            View more
-          </Link>
-        </div>
+      {relatedProducts.length > 0 && (
+        <section className="mt-16 sm:mt-20 lg:mt-24">
+          <div className="flex justify-between items-center mb-8">
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-neutral-900 italic">
+              You might also like
+            </h2>
+            <Link
+              href="/products"
+              className="text-neutral-600 hover:text-neutral-900 text-sm sm:text-base font-medium transition-colors"
+            >
+              View more
+            </Link>
+          </div>
 
-        <ProductGrid
-          products={relatedProducts}
-          favoriteIds={favorites}
-          onFavoriteToggle={toggleFavorite}
-          onAddToCart={(id) => console.log('Add to cart:', id)}
-        />
-      </section>
+          <ProductGrid
+            products={relatedProducts}
+            favoriteIds={favorites}
+            onFavoriteToggle={toggleFavorite}
+            onAddToCart={(id) => addItem(id, '', '', 1)}
+          />
+        </section>
+      )}
     </div>
   );
 }

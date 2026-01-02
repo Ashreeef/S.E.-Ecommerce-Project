@@ -22,7 +22,7 @@ export default function OrderForm({ order }: OrderFormProps) {
 
   const handleSave = async () => {
     if (!order.id) return;
-    const res = await updateStatus(order.id, selectedStatus);
+    const res = await updateStatus(selectedStatus);
     if (res && (res as any).success) {
       alert('Order status saved');
       try { router.refresh(); } catch (e) { }
@@ -80,7 +80,7 @@ export default function OrderForm({ order }: OrderFormProps) {
           <div className="shipment-timeline">
             <h3>Shipment timeline</h3>
             <ul>
-              {order.shipmentTimeline.map((t, i) => (
+              {(order.shipmentTimeline || []).map((t, i) => (
                 <li key={i} className="timeline-entry">
                   <div className="timeline-dot" />
                   <div className="timeline-body">
@@ -120,27 +120,27 @@ export default function OrderForm({ order }: OrderFormProps) {
                 <div className="detail-row"><span>Date purchased</span><span>{order.datePurchased}</span></div>
                 <div className="detail-row"><span>Date delivered</span><span>{order.dateDelivered || '-'}</span></div>
                 <div className="detail-row"><span>Estimated delivery period</span><span>{order.estimatedDelivery || '-'}</span></div>
-                <div className="detail-row"><span>Number of Products</span><span>{String(order.numberOfProducts).padStart(2, '0')}</span></div>
-                <div className="detail-row"><span>Total Amount</span><span>{order.grandTotal.toFixed(2)} DZD</span></div>
-                <div className="detail-row"><span>Delivery company</span><span>{order.deliveryCompany}</span></div>
+                <div className="detail-row"><span>Number of Products</span><span>{String(order.numberOfProducts || 0).padStart(2, '0')}</span></div>
+                <div className="detail-row"><span>Total Amount</span><span>{(order.grandTotal || 0).toFixed(2)} DZD</span></div>
+                <div className="detail-row"><span>Delivery company</span><span>{order.deliveryCompany || 'TBD'}</span></div>
               </div>
             </div>
           </section>
 
           <section className="order-card items-card">
             <div className="items-header">
-              <h5>Items details ({order.numberOfProducts} items)</h5>
+              <h5>Items details ({order.numberOfProducts || 0} items)</h5>
             </div>
             <div className="items-list">
-              {order.products.map((p, i) => (
+              {(order.products || []).map((p, i) => (
                 <div className="item-row" key={i}>
                   <div className="item-left">
-                    <div className="item-name">{p.product.name}</div>
-                    <div className="item-id">{p.product.id}</div>
+                    <div className="item-name">{p.product?.name || 'Product'}</div>
+                    <div className="item-id">{p.product?.id || 'N/A'}</div>
                   </div>
                   <div className="item-right">
-                    <div className="item-price">{p.price.toFixed(2)} DZD</div>
-                    <div className="item-qty">{p.quantity} pcs</div>
+                    <div className="item-price">{(p.price || 0).toFixed(2)} DZD</div>
+                    <div className="item-qty">{p.quantity || 1} pcs</div>
                   </div>
                 </div>
               ))}
@@ -149,11 +149,11 @@ export default function OrderForm({ order }: OrderFormProps) {
 
           <section className="order-card payment-card-summary">
             <h5>Payment Details</h5>
-            <div className="detail-row"><span>Total amount</span><span>{order.totalAmount.toFixed(2)} DZD</span></div>
-            <div className="detail-row"><span>Shipping fee</span><span>{order.shippingFee.toFixed(2)} DZD</span></div>
-            <div className="detail-row"><span>Tax</span><span>{order.tax.toFixed(2)} DZD</span></div>
+            <div className="detail-row"><span>Total amount</span><span>{(order.totalAmount || 0).toFixed(2)} DZD</span></div>
+            <div className="detail-row"><span>Shipping fee</span><span>{(order.shippingFee || 0).toFixed(2)} DZD</span></div>
+            <div className="detail-row"><span>Tax</span><span>{(order.tax || 0).toFixed(2)} DZD</span></div>
             <div className="detail-row"><span>Discount</span><span>{(order.discount || 0).toFixed(2)} DZD</span></div>
-            <div className="detail-row grand-total"><span>Grand Total</span><span>{order.grandTotal.toFixed(2)} DZD</span></div>
+            <div className="detail-row grand-total"><span>Grand Total</span><span>{(order.grandTotal || 0).toFixed(2)} DZD</span></div>
           </section>
         </main>
       </div>

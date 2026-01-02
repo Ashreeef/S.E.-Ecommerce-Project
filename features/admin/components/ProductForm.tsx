@@ -28,7 +28,7 @@ const DISCOUNT_TYPES = ['Back to school', 'Seasonal', 'Clearance', 'Flash sale',
 
 interface ProductFormProps {
   productId?: string;
-  initialData?: Partial<ProductFormData>; 
+  initialData?: Partial<ProductFormData>;
   isEdit?: boolean;
 }
 
@@ -162,7 +162,7 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
           {/* Product Images Section */}
           <div className="product-images-section">
             <h3 className="product-images-title">Product Images</h3>
-            
+
             {/* Main Image Upload */}
             <div
               className="product-image-upload"
@@ -218,7 +218,7 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
                   onClick={() => thumbnailInputRefs.current[index]?.click()}
                 >
                   <input
-                    ref={(el) => {(thumbnailInputRefs.current[index] = el)}}
+                    ref={(el) => { (thumbnailInputRefs.current[index] = el) }}
                     type="file"
                     accept="image/*"
                     className="hidden"
@@ -314,34 +314,46 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
             {/* Color */}
             <div>
               <label className="product-form-label">
-                Color
+                Available Colors
               </label>
               <div className="product-color-selector">
-                {COLORS.map((color) => (
-                  <button
-                    key={color.value}
-                    type="button"
-                    onClick={() => updateField('color', color.value)}
-                    className={`product-color-swatch ${
-                      formData.color === color.value
-                        ? 'product-color-swatch-selected'
-                        : 'product-color-swatch-default'
-                    }`}
-                    style={{ backgroundColor: color.hex }}
-                    title={color.name}
-                  />
-                ))}
-                <div className="product-color-dropdown">
-                  <Input
-                    variant="list"
-                    value={formData.color}
-                    onChange={(value) => updateField('color', value)}
-                    options={COLORS.map(c => c.name)}
-                    placeholder="More colors"
-                    className="w-32"
-                  />
-                </div>
+                {COLORS.map((color) => {
+                  const isSelected = formData.availableColors?.some(c => c.name.toLowerCase() === color.value.toLowerCase());
+                  return (
+                    <button
+                      key={color.value}
+                      type="button"
+                      onClick={() => {
+                        const currentColors = [...(formData.availableColors || [])];
+                        const index = currentColors.findIndex(c => c.name.toLowerCase() === color.value.toLowerCase());
+
+                        if (index >= 0) {
+                          // Remove if already selected
+                          currentColors.splice(index, 1);
+                        } else {
+                          // Add if not selected
+                          currentColors.push({ name: color.name, hex: color.hex });
+                        }
+
+                        updateField('availableColors', currentColors);
+                        // Also set the first selected as the "main" color for backward compatibility
+                        if (currentColors.length > 0 && !formData.color) {
+                          updateField('color', currentColors[0].name.toLowerCase());
+                        }
+                      }}
+                      className={`product-color-swatch ${isSelected
+                          ? 'product-color-swatch-selected'
+                          : 'product-color-swatch-default'
+                        }`}
+                      style={{ backgroundColor: color.hex }}
+                      title={color.name}
+                    />
+                  );
+                })}
               </div>
+              <p className="text-xs text-neutral-400 mt-2">
+                Click to select/deselect colors that will be available to customers.
+              </p>
             </div>
 
             {/* Gender */}
@@ -355,11 +367,10 @@ export default function ProductForm({ productId, initialData, isEdit = false }: 
                     key={gender}
                     type="button"
                     onClick={() => updateField('gender', gender)}
-                    className={`product-gender-button ${
-                      formData.gender === gender
+                    className={`product-gender-button ${formData.gender === gender
                         ? 'product-gender-button-selected'
                         : 'product-gender-button-default'
-                    }`}
+                      }`}
                   >
                     {gender}
                   </button>

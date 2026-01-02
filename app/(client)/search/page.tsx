@@ -12,7 +12,7 @@ import { SortOption } from '@/components/ui/sort-control';
 function SearchResults() {
   const searchParams = useSearchParams();
   const query = searchParams.get('q') || '';
-  
+
   const [sortOption, setSortOption] = useState<SortOption>('default');
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
@@ -26,15 +26,15 @@ function SearchResults() {
   const searchResults = useMemo(() => {
     // TODO: Replace with actual backend API call
     // const results = await fetch(`/api/search?q=${query}`).then(res => res.json());
-    
+
     // For now: Filter products by title or description matching the query
     if (!query.trim()) {
       return mockProducts;
     }
 
     const searchLower = query.toLowerCase();
-    return mockProducts.filter(product => 
-      product.title.toLowerCase().includes(searchLower) ||
+    return mockProducts.filter(product =>
+      product.name.toLowerCase().includes(searchLower) ||
       product.description.toLowerCase().includes(searchLower) ||
       product.category.toLowerCase().includes(searchLower)
     );
@@ -81,7 +81,7 @@ function SearchResults() {
             onSortChange={setSortOption}
           />
 
-          <ProductGrid 
+          <ProductGrid
             products={paginatedProducts}
             favoriteIds={favorites}
             onFavoriteToggle={toggleFavorite}

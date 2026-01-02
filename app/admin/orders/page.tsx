@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CustomButton } from '@/components/ui/custom-button';
 import { Input } from '@/components/ui/input';
@@ -8,12 +8,9 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/orders-list.css';
-import { orders } from '@/lib/types/orders';
 import { Order } from '@/lib/types/orders';
 import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
-
-// Use orders imported from `lib/types/orders.ts` as the mock list
-const mockOrders: Order[] = orders;
+import { useOrders } from '@/hooks/useOrders';
 
 export default function OrdersPage() {
   const router = useRouter();
@@ -23,8 +20,17 @@ export default function OrdersPage() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const ordersPerPage = 10;
-  const totalPages = Math.ceil(mockOrders.length / ordersPerPage);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
+
+  const { orders, isLoading, error, refresh } = useOrders();
+
+  // Check login
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      router.push('/admin/login');
+    }
+  }, [router]);
 
   const toggleRow = (id: string) => {
     setExpandedRows(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -32,7 +38,7 @@ export default function OrdersPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedOrders(mockOrders.map(o => o.id));
+      setSelectedOrders(orders.map(o => o.id));
     } else {
       setSelectedOrders([]);
     }
@@ -47,7 +53,6 @@ export default function OrdersPage() {
   };
 
   const handleEdit = (orderId: string) => {
-    // encode order id (e.g. '#CRO00221') so the hash doesn't break the path
     const safeId = encodeURIComponent(orderId);
     router.push(`/admin/orders/${safeId}`);
   };
@@ -57,17 +62,20 @@ export default function OrdersPage() {
     setDeleteModalOpen(true);
   };
 
-  const filteredOrders = mockOrders.filter(order =>
-    order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredOrders = orders.filter(order => {
+    const name = order.customerName || '';
+    const id = order.id || '';
+    const query = searchQuery.toLowerCase();
+    return name.toLowerCase().includes(query) || id.toLowerCase().includes(query);
+  });
+
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
 
   const paginatedOrders = filteredOrders.slice(
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
 
-  // Map OrderStatus to BadgeState
   const mapStatusToBadge = (status: string): 'delivered' | 'confirmed' | 'returned' | 'cancelled' | 'pending' | 'sent' => {
     const statusMap: Record<string, 'delivered' | 'confirmed' | 'returned' | 'cancelled' | 'pending' | 'sent'> = {
       'Delivered': 'delivered',
@@ -80,6 +88,38 @@ export default function OrdersPage() {
     return statusMap[status] || 'pending';
   };
 
+  if (isLoading) {
+    return (
+      <div className="page-container flex items-center justify-center min-h-[400px]">
+        <div className="text-lg text-neutral-500 font-medium">Loading orders...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    const isAuthError = error.toLowerCase().includes('auth') || error.toLowerCase().includes('expired');
+    return (
+      <div className="page-container flex flex-col items-center justify-center min-h-[400px] gap-4">
+        <div className="text-lg text-red-500 font-medium whitespace-pre-wrap max-w-md text-center">
+          {error}
+        </div>
+        {isAuthError ? (
+          <CustomButton
+            variant="filled"
+            text="Go to Login"
+            onClick={() => router.push('/admin/login')}
+          />
+        ) : (
+          <CustomButton
+            variant="filled"
+            text="Try Again"
+            onClick={() => refresh()}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="page-container orders-list-container">
       {/* Breadcrumb */}
@@ -91,7 +131,7 @@ export default function OrdersPage() {
 
       {/* Page Header */}
       <div className="page-header">
-        <h2 className="page-title">Orders</h2>
+        <h2 className="page-title">Orders ({filteredOrders.length})</h2>
       </div>
 
       {/* Toolbar */}
@@ -150,7 +190,7 @@ export default function OrdersPage() {
               {expandedRows.includes(order.id) && (
                 <div className="mobile-order-details mt-3 text-sm text-neutral-600">
                   <div className="grid grid-cols-2 gap-2">
-                    <div><strong>Date</strong>: {order.datePurchased}</div>
+                    <div><strong>Date</strong>: {new Date(order.datePurchased).toLocaleDateString()}</div>
                     <div><strong>Total</strong>: {order.grandTotal.toFixed(2)} DZD</div>
                     <div><strong>Items</strong>: {order.numberOfProducts}</div>
                     <div><strong>Address</strong>: {order.address}</div>
@@ -216,8 +256,8 @@ export default function OrdersPage() {
                     </div>
                   </td>
                   <td className="orders-table-cell">{order.customerName}</td>
-                  <td className="orders-table-cell">{order.datePurchased}</td>
-                  <td className="orders-table-cell">{order.grandTotal.toFixed(2)} DZD</td>
+                  <td className="orders-table-cell">{new Date(order.datePurchased).toLocaleDateString()}</td>
+                  <td className="orders-table-cell">{(order.grandTotal || 0).toFixed(2)} DZD</td>
                   <td className="orders-table-cell">{order.numberOfProducts}</td>
                   <td className="orders-table-cell">{order.address}</td>
                   <td className="orders-table-cell">
@@ -247,49 +287,52 @@ export default function OrdersPage() {
       </div>
 
       {/* Pagination */}
-      <div className="orders-pagination">
-        <button
-          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-          disabled={currentPage === 1}
-          className="orders-pagination-button"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <div className="orders-pagination-numbers">
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            const pageNum = i + 1;
-            return (
-              <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                className={`orders-pagination-number ${currentPage === pageNum ? 'orders-pagination-number-active' : ''
-                  }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
-          {totalPages > 5 && (
-            <>
-              <span className="orders-pagination-ellipsis">.....</span>
-              <button
-                onClick={() => setCurrentPage(totalPages)}
-                className={`orders-pagination-number ${currentPage === totalPages ? 'orders-pagination-number-active' : ''
-                  }`}
-              >
-                {totalPages}
-              </button>
-            </>
-          )}
+      {totalPages > 1 && (
+        <div className="orders-pagination">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="orders-pagination-button"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="orders-pagination-numbers">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const pageNum = i + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`orders-pagination-number ${currentPage === pageNum ? 'orders-pagination-number-active' : ''
+                    }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            {totalPages > 5 && (
+              <>
+                <span className="orders-pagination-ellipsis">.....</span>
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className={`orders-pagination-number ${currentPage === totalPages ? 'orders-pagination-number-active' : ''
+                    }`}
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+          </div>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="orders-pagination-button"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-          disabled={currentPage === totalPages}
-          className="orders-pagination-button"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {productToDelete && (
         <DeleteProductModal
@@ -303,12 +346,10 @@ export default function OrdersPage() {
           onSuccess={() => {
             setDeleteModalOpen(false);
             setProductToDelete(null);
-            alert('Order deleted successfully');
+            alert('Order deleted successfully (Not implemented in API yet)');
           }}
         />
       )}
     </div>
   );
 }
-
-

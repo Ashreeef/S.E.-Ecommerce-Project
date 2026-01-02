@@ -6,17 +6,11 @@ import Link from 'next/link';
 import { Heart, Star, ShoppingCart } from 'lucide-react';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
+import { Product } from '@/lib/types/product';
 import { CustomButton } from './custom-button';
 
 export interface ProductCardProps {
-  product: {
-    id: string;
-    title: string;
-    image: string;
-    price: number;
-    originalPrice?: number;
-    rating: number;
-  };
+  product: Product;
   isFavorite?: boolean;
   onFavoriteToggle?: (id: string) => void;
   onAddToCart?: (id: string) => void;
@@ -67,10 +61,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
   const handleFavoriteClick = useCallback((e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    
+
     setFavoriteAnimation(true);
     setTimeout(() => setFavoriteAnimation(false), 300);
-    
+
     onFavoriteToggle?.(product.id);
   }, [product.id, onFavoriteToggle]);
 
@@ -143,7 +137,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {!imageError ? (
           <Image
             src={product.image}
-            alt={product.title}
+            alt={product.name}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className={cn(
@@ -212,12 +206,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <h3
           id={`product-title-${product.id}`}
           className="text-neutral-600 font-normal leading-snug line-clamp-2 text-sm sm:text-base"
-          title={product.title}
+          title={product.name}
         >
-          {product.title}
+          {product.name}
         </h3>
 
-        <div 
+        <div
           className="flex items-center gap-1 sm:gap-1.5"
           role="img"
           aria-label={`Rating: ${product.rating} out of 5 stars`}
@@ -234,7 +228,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           <span className="text-neutral-600 text-base sm:text-lg md:text-xl font-semibold">
             {formatPrice(product.price)}
           </span>
-          
+
           {product.originalPrice && product.originalPrice > product.price && (
             <span className="text-neutral-300 text-sm sm:text-base line-through">
               {formatPrice(product.originalPrice)}

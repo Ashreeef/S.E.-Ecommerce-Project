@@ -1,5 +1,10 @@
+"use client";
+
 import { useState } from 'react';
-import { CartItem, FormData, ValidationResult } from '@/types/checkout';
+import { FormData, ValidationResult } from '@/types/checkout';
+import { ApiCartItem } from './useCart';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_REGEX = /^(05|06|07)[0-9]{8}$/;
@@ -19,6 +24,8 @@ export const useCheckoutForm = () => {
   });
 
   const [error, setError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
 
   const updateField = <K extends keyof FormData>(field: K, value: FormData[K]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -86,9 +93,10 @@ export const useCheckoutForm = () => {
       orderNotes: '',
     });
     setError('');
+    setOrderNumber(null);
   };
 
-  const submitForm = (cartItems: CartItem[], total: number) => {
+  const submitForm = async (cartItems: ApiCartItem[], total: number) => {
     const validation = validateForm();
 
     if (!validation.isValid) {
@@ -96,17 +104,59 @@ export const useCheckoutForm = () => {
       return false;
     }
 
-    const orderData = {
-      ...formData,
-      items: cartItems,
-      total,
-    };
+    if (cartItems.length === 0) {
+      setError('السلة فارغة / Cart is empty');
+      return false;
+    }
 
-    console.log('Order submitted:', orderData);
-    alert('تم تأكيد الطلب بنجاح! / Order confirmed successfully!');
+    setIsSubmitting(true);
+    setError('');
 
-    resetForm();
-    return true;
+    try {
+      // Get session ID from localStorage
+      const sessionId = typeof window !== 'undefined'
+        ? localStorage.getItem('cart_session_id') || ''
+        : '';
+
+      const response = await fetch(`${API_BASE}/api/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Session-ID': sessionId
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          phone: formData.phone,
+          email: formData.email,
+          wilaya: formData.wilaya,
+          city: formData.city,
+          address: formData.address,
+          shippingMethod: formData.shippingMethod,
+          bureau: formData.bureau,
+          orderNotes: formData.orderNotes
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        setOrderNumber(data.orderNumber);
+        alert(`تم تأكيد الطلب بنجاح! رقم الطلب: ${data.orderNumber} / Order confirmed! Order #: ${data.orderNumber}`);
+        resetForm();
+        return true;
+      } else {
+        setError(data.error || 'فشل في إنشاء الطلب / Failed to create order');
+        return false;
+      }
+    } catch (err) {
+      console.error('Order submission error:', err);
+      setError('خطأ في الشبكة / Network error');
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return {
@@ -115,5 +165,8 @@ export const useCheckoutForm = () => {
     error,
     setError,
     submitForm,
+    isSubmitting,
+    orderNumber,
+    resetForm
   };
 };

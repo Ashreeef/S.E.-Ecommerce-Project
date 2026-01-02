@@ -3,8 +3,10 @@
 import { useState, useCallback } from 'react';
 import { Product } from '@/lib/types/product';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 // Form data interface that extends Product with form-specific fields
-export interface ProductFormData extends Omit<Product, 'images' | 'availableSizes' | 'availableColors' | 'id' | 'rating' | 'sales' | 'date' | 'status'> {
+export interface ProductFormData extends Omit<Product, 'images' | 'availableSizes' | 'id' | 'rating' | 'sales' | 'date' | 'status'> {
   images: File[];
   imageUrls: string[];
   availableSizes: string; // comma-separated for form
@@ -31,6 +33,7 @@ const initialFormData: ProductFormData = {
   imageUrls: [],
   category: '',
   availableSizes: '',
+  availableColors: [],
   description: '',
   isAvailable: true,
   color: '',
@@ -103,63 +106,82 @@ export function useProductForm(): UseProductFormReturn {
     return Object.keys(newErrors).length === 0;
   }, [formData]);
 
+  const uploadImage = async (file: File, token: string) => {
+    const uploadData = new FormData();
+    uploadData.append('image', file);
+
+    const response = await fetch(`${API_BASE}/api/upload`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: uploadData
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to upload image');
+    }
+
+    const data = await response.json();
+    return data.url;
+  };
+
   const submitForm = useCallback(async (isDraft = false, isEdit = false, productId?: string): Promise<{ success: boolean; error?: string }> => {
     if (!isDraft && !validateForm()) {
       return { success: false, error: 'Please fix the form errors' };
     }
 
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      return { success: false, error: 'No admin token found. Please login again.' };
+    }
+
     setIsLoading(true);
     try {
-      const submitData = new FormData();
-      
-      // Map form data to Product structure
-      submitData.append('name', formData.name);
-      submitData.append('description', formData.description);
-      submitData.append('category', formData.category);
-      submitData.append('price', formData.price.toString());
-      submitData.append('stock', formData.stock.toString());
-      submitData.append('discount', (formData.discount || 0).toString());
-      submitData.append('discountType', formData.discountType || '');
-      submitData.append('color', formData.color || '');
-      submitData.append('gender', formData.gender);
-      submitData.append('fit', formData.fit || '');
-      submitData.append('modelDetails', formData.modelDetails || '');
-      submitData.append('originalPrice', (formData.originalPrice || 0).toString());
-      submitData.append('image', formData.image);
-      
-      // Map size string to availableSizes array
-      if (formData.availableSizes) {
-        const sizesArray = formData.availableSizes.split(',').map((s: string) => s.trim()).filter(Boolean);
-        submitData.append('availableSizes', JSON.stringify(sizesArray));
-      }
-      
-      // Map isAvailable boolean
-      submitData.append('isAvailable', formData.isAvailable.toString());
-
-      // Handle images
-      if (formData.images.length > 0) {
-        submitData.append('imageCount', formData.images.length.toString());
-        formData.images.forEach((file: File, index: number) => {
-          if (file instanceof File) {
-            submitData.append(`image_${index}`, file);
-          }
-        });
+      // 1. Upload new images if any
+      const newImageUrls = [...formData.imageUrls];
+      for (const file of formData.images) {
+        if (file instanceof File) {
+          const url = await uploadImage(file, token);
+          newImageUrls.push(url);
+        }
       }
 
-      // Add existing image URLs
-      if (formData.imageUrls && formData.imageUrls.length > 0) {
-        submitData.append('existingImageUrls', JSON.stringify(formData.imageUrls));
-      }
+      // 2. Prepare product data
+      const productPayload = {
+        name: formData.name,
+        price: formData.price,
+        originalPrice: formData.originalPrice,
+        description: formData.description,
+        category: formData.category,
+        image: newImageUrls[0] || formData.image, // Main image
+        images: newImageUrls.map((url, i) => ({ id: `img-${i}`, url, alt: formData.name })),
+        gender: formData.gender,
+        stock: formData.stock,
+        color: formData.color,
+        availableColors: formData.availableColors,
+        isAvailable: formData.isAvailable,
+        status: formData.isAvailable ? 'Available' : 'Out-of-stock',
+        fit: formData.fit,
+        modelDetails: formData.modelDetails,
+        discount: formData.discount,
+        discountType: formData.discountType,
+        availableSizes: formData.availableSizes.split(',').map(s => s.trim()).filter(Boolean)
+      };
 
-      const url = isEdit && productId 
-        ? `/api/products/${productId}`
-        : '/api/products';
-      
+      const url = isEdit && productId
+        ? `${API_BASE}/api/products/${productId}`
+        : `${API_BASE}/api/products`;
+
       const method = isEdit ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
         method,
-        body: submitData,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(productPayload),
       });
 
       const result = await response.json();
@@ -176,15 +198,7 @@ export function useProductForm(): UseProductFormReturn {
       return { success: true };
     } catch (error) {
       console.error('Error submitting form:', error);
-      // Fallback: simulate success for demo purposes when API is unavailable
-      console.log('API unavailable, using fallback mode');
-      
-      // Reset form on success (only for new products)
-      if (!isDraft && !isEdit) {
-        setFormData(initialFormData);
-      }
-      
-      return { success: true };
+      return { success: false, error: 'Failed to submit' };
     } finally {
       setIsLoading(false);
     }

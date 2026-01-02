@@ -1,79 +1,146 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { Order, orders as mockOrders } from '@/lib/types/orders';
+import { Order } from '@/lib/types/orders';
 
-export function useOrder(orderId?: string) {
-  const [order, setOrder] = useState<Order | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
+export function useOrders() {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchOrder = useCallback(async (id?: string) => {
-    if (!id) return;
+  const fetchOrders = useCallback(async () => {
     setIsLoading(true);
-    setError(null);
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      setError('Not authenticated - Missing admin token');
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const res = await fetch(`/api/orders/${id}`);
-      if (!res.ok) {
-        // fallback to local mock data
-        const local = mockOrders.find(o => o.id === id) || null;
-        setOrder(local);
+      console.log('Fetching orders from:', `${API_BASE}/api/orders`);
+      const res = await fetch(`${API_BASE}/api/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.status === 401) {
+        localStorage.removeItem('admin_token'); // Clear expired token
+        setError('Your session has expired. Please login again.');
         setIsLoading(false);
         return;
       }
+
       const data = await res.json();
-      setOrder(data as Order);
+
+      if (!res.ok) {
+        const errorMsg = data.error || `Failed to fetch orders (${res.status})`;
+        const details = data.details ? ` (${data.details})` : '';
+        throw new Error(`${errorMsg}${details}`);
+      }
+
+      console.log('Successfully fetched orders:', data.length);
+      setOrders(data);
+      setError(null);
     } catch (err) {
-      // fallback to local mock data
-      const local = mockOrders.find(o => o.id === id) || null;
-      setOrder(local);
+      console.error('Order fetch error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch orders');
     } finally {
       setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
-    if (orderId) fetchOrder(orderId);
-  }, [orderId, fetchOrder]);
-  // update status in order detail page
-  const updateStatus = useCallback(async (id: string, status: Order['status']) => {
-    setIsLoading(true);
-    setError(null);
+    fetchOrders();
+  }, [fetchOrders]);
+
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    const token = localStorage.getItem('admin_token');
     try {
-      const res = await fetch(`/api/orders/${id}`, {
+      const res = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(orderId)}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status })
       });
-      if (!res.ok) {
-        // update local mock as fallback
-        const idx = mockOrders.findIndex(o => o.id === id);
-        if (idx !== -1) {
-          mockOrders[idx].status = status;
-          setOrder({ ...mockOrders[idx] });
-          setIsLoading(false);
-          return { success: true };
-        }
-        setIsLoading(false);
-        return { success: false, error: 'Failed to update order' };
+      if (res.ok) {
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: status as any } : o));
+        return { success: true };
       }
-      const updated = await res.json();
-      setOrder(updated as Order);
-      setIsLoading(false);
-      return { success: true };
+      return { success: false };
     } catch (err) {
-      setIsLoading(false);
-      setError('Network error');
-      return { success: false, error: 'Network error' };
+      return { success: false, error: err };
     }
-  }, []);
+  };
 
   return {
-    order,
+    orders,
     isLoading,
     error,
-    fetchOrder,
-    updateStatus,
-    setOrder,
+    refresh: fetchOrders,
+    updateOrderStatus
   };
+}
+
+export function useOrder(orderId?: string) {
+  const [order, setOrder] = useState<Order | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchOrder = useCallback(async () => {
+    if (!orderId) return;
+    setIsLoading(true);
+    const token = localStorage.getItem('admin_token');
+
+    try {
+      // For now, since we don't have a single order GET, we filter the list or update API
+      // Let's assume the API handles /api/orders/<id> if not I'll use the list
+      const res = await fetch(`${API_BASE}/api/orders`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      if (!res.ok) throw new Error('Failed to fetch order');
+      const data: Order[] = await res.json();
+      const found = data.find(o => o.id === orderId);
+      setOrder(found || null);
+    } catch (err) {
+      setError('Failed to fetch order');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [orderId]);
+
+  useEffect(() => {
+    fetchOrder();
+  }, [fetchOrder]);
+
+  const updateStatus = async (newStatus: string) => {
+    if (!orderId) return;
+    const token = localStorage.getItem('admin_token');
+    try {
+      const res = await fetch(`${API_BASE}/api/orders/${encodeURIComponent(orderId)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ status: newStatus })
+      });
+      if (res.ok) {
+        setOrder(prev => prev ? { ...prev, status: newStatus as any } : null);
+        return { success: true };
+      }
+      return { success: false };
+    } catch (e) {
+      return { success: false };
+    }
+  };
+
+  return { order, isLoading, error, updateStatus };
 }

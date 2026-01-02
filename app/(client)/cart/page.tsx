@@ -1,67 +1,42 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import CartItem from '@/components/ui/cartItem';
 import { CustomButton } from '@/components/ui';
 import { ArrowLeft, ArrowRight, Ticket } from 'lucide-react';
+import { useCart } from '@/hooks/useCart';
 
 export default function CartPage() {
   const router = useRouter();
-  
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: "Denim baggy jeans",
-      size: "XL",
-      color: "Navy blue",
-      price: 3500.0,
-      originalPrice: 4500.0,
-      quantity: 1,
-      image: "",
-    },
-    {
-      id: 2,
-      name: "Denim baggy jeans",
-      size: "XL",
-      color: "Navy blue",
-      price: 3500.0,
-      originalPrice: 4500.0,
-      quantity: 1,
-      image: "",
-    },
-    {
-      id: 5,
-      name: "Denim baggy jeans",
-      size: "XL",
-      color: "Navy blue",
-      price: 3500.0,
-      originalPrice: 4500.0,
-      quantity: 2,
-      image: "",
-    },
-  ]);
+  const {
+    cartItems,
+    isLoading,
+    removeItem,
+    updateQuantity,
+    subtotal
+  } = useCart();
 
   const [couponCode, setCouponCode] = useState("");
 
-  const total = cartItems.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  );
-
-  const removeItem = (id: number) => {
-    setCartItems((items) => items.filter((item) => item.id !== id));
+  // Wrapper functions to handle the async nature
+  const handleRemoveItem = (id: string | number) => {
+    removeItem(String(id));
   };
 
-  const updateQuantity = (id: number, newQuantity: number) => {
-    if (newQuantity < 1 || newQuantity > 10) return;
-    
-    setCartItems((items) =>
-      items.map((item) =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
+  const handleUpdateQuantity = (id: string | number, newQuantity: number) => {
+    updateQuantity(String(id), newQuantity);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-lg text-neutral-500">Loading cart...</div>
+        </div>
+      </div>
     );
-  };
+  }
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -88,9 +63,18 @@ export default function CartPage() {
             cartItems.map((item) => (
               <CartItem
                 key={item.id}
-                item={item}
-                removeItem={removeItem}
-                updateQuantity={updateQuantity}
+                item={{
+                  id: item.id,
+                  name: item.name,
+                  size: item.size,
+                  color: item.color,
+                  price: item.price,
+                  originalPrice: item.originalPrice,
+                  quantity: item.quantity,
+                  image: item.image
+                }}
+                removeItem={handleRemoveItem}
+                updateQuantity={handleUpdateQuantity}
               />
             ))
           )}
@@ -111,7 +95,7 @@ export default function CartPage() {
             <div className="flex justify-between items-center mb-3">
               <span className="text-neutral-500">Total amount:</span>
               <span className="text-rose-400 text-2xl font-semibold">
-                {total.toFixed(2)} DZD
+                {subtotal.toFixed(2)} DZD
               </span>
             </div>
 

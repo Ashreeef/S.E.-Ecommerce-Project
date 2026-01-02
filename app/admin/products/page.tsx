@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { CustomButton } from '@/components/ui/custom-button';
@@ -10,13 +10,10 @@ import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
 import { Plus, ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/products-list.css';
-import {products } from '@/lib/types/product';
 import { Product } from '@/lib/types/product';
+import { useProducts } from '@/hooks/useProducts';
 
-// Mock product data - in production, this would come from an API
-
-// Use products imported from `lib/types/product.ts` as the mock list
-const mockProducts: Product[] =  products;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function ProductsPage() {
   const router = useRouter();
@@ -27,8 +24,18 @@ export default function ProductsPage() {
   const [productToDelete, setProductToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const productsPerPage = 10;
-  const totalPages = Math.ceil(mockProducts.length / productsPerPage);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
+
+  // Fetch products from API
+  const { products, isLoading, error, refresh } = useProducts();
+
+  // Check login
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (!token) {
+      router.push('/admin/login');
+    }
+  }, [router]);
 
   const toggleRow = (id: string) => {
     setExpandedRows(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
@@ -36,7 +43,7 @@ export default function ProductsPage() {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedProducts(mockProducts.map(p => p.id));
+      setSelectedProducts(products.map(p => p.id));
     } else {
       setSelectedProducts([]);
     }
@@ -59,6 +66,32 @@ export default function ProductsPage() {
     setDeleteModalOpen(true);
   };
 
+  const handleDeleteConfirm = async (productId: string) => {
+    setIsDeleting(true);
+    const token = localStorage.getItem('admin_token');
+    try {
+      const response = await fetch(`${API_BASE}/api/products/${productId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        alert('Product deleted successfully');
+        refresh();
+      } else {
+        alert('Failed to delete product');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Error deleting product');
+    } finally {
+      setIsDeleting(false);
+      setDeleteModalOpen(false);
+      setProductToDelete(null);
+    }
+  };
 
   const handleCloseModal = () => {
     if (!isDeleting) {
@@ -67,15 +100,25 @@ export default function ProductsPage() {
     }
   };
 
-  const filteredProducts = mockProducts.filter(product =>
+  const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     product.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
 
   const paginatedProducts = filteredProducts.slice(
     (currentPage - 1) * productsPerPage,
     currentPage * productsPerPage
   );
+
+  if (isLoading) {
+    return (
+      <div className="page-container flex items-center justify-center min-h-[400px]">
+        <div className="text-lg text-neutral-500">Loading products...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container products-list-container">
@@ -88,7 +131,7 @@ export default function ProductsPage() {
 
       {/* Page Header */}
       <div className="page-header">
-        <h2 className="page-title">Products</h2>
+        <h2 className="page-title">Products ({filteredProducts.length})</h2>
       </div>
 
       {/* Toolbar */}
@@ -256,51 +299,51 @@ export default function ProductsPage() {
       </div>
 
       {/* Pagination */}
-      <div className="products-pagination">
-        <button
-          onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-          disabled={currentPage === 1}
-          className="products-pagination-button"
-        >
-          <ChevronLeft className="w-4 h-4" />
-        </button>
-        <div className="products-pagination-numbers">
-          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-            const pageNum = i + 1;
-            return (
-              <button
-                key={pageNum}
-                onClick={() => setCurrentPage(pageNum)}
-                className={`products-pagination-number ${
-                  currentPage === pageNum ? 'products-pagination-number-active' : ''
-                }`}
-              >
-                {pageNum}
-              </button>
-            );
-          })}
-          {totalPages > 5 && (
-            <>
-              <span className="products-pagination-ellipsis">.....</span>
-              <button
-                onClick={() => setCurrentPage(totalPages)}
-                className={`products-pagination-number ${
-                  currentPage === totalPages ? 'products-pagination-number-active' : ''
-                }`}
-              >
-                {totalPages}
-              </button>
-            </>
-          )}
+      {totalPages > 1 && (
+        <div className="products-pagination">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="products-pagination-button"
+          >
+            <ChevronLeft className="w-4 h-4" />
+          </button>
+          <div className="products-pagination-numbers">
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const pageNum = i + 1;
+              return (
+                <button
+                  key={pageNum}
+                  onClick={() => setCurrentPage(pageNum)}
+                  className={`products-pagination-number ${currentPage === pageNum ? 'products-pagination-number-active' : ''
+                    }`}
+                >
+                  {pageNum}
+                </button>
+              );
+            })}
+            {totalPages > 5 && (
+              <>
+                <span className="products-pagination-ellipsis">.....</span>
+                <button
+                  onClick={() => setCurrentPage(totalPages)}
+                  className={`products-pagination-number ${currentPage === totalPages ? 'products-pagination-number-active' : ''
+                    }`}
+                >
+                  {totalPages}
+                </button>
+              </>
+            )}
+          </div>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="products-pagination-button"
+          >
+            <ChevronRight className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-          disabled={currentPage === totalPages}
-          className="products-pagination-button"
-        >
-          <ChevronRight className="w-4 h-4" />
-        </button>
-      </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {productToDelete && (
@@ -309,11 +352,7 @@ export default function ProductsPage() {
           resourceId={productToDelete}
           resourceType="product"
           onClose={handleCloseModal}
-          onSuccess={() => {
-            setDeleteModalOpen(false);
-            setProductToDelete(null);
-            alert('Product deleted successfully');
-          }}
+          onSuccess={() => handleDeleteConfirm(productToDelete)}
         />
       )}
     </div>

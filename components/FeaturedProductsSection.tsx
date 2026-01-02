@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { ArrowRight, Star } from 'lucide-react';
 import { CustomButton } from '@/components/ui';
+import { useProducts } from '@/hooks/useProducts';
 
 interface Product {
   id: string;
@@ -14,46 +15,6 @@ interface Product {
   badge?: string;
 }
 
-const featuredProducts: Product[] = [
-  {
-    id: '1',
-    name: 'Elegant Ensemble',
-    price: 4500,
-    originalPrice: 6000,
-    rating: 4.9,
-    reviews: 67,
-    image: '/assets/ensemble.JPG',
-    badge: 'Best Seller',
-  },
-  {
-    id: '2',
-    name: 'Chic Summer Robe',
-    price: 3200,
-    rating: 4.8,
-    reviews: 43,
-    image: '/assets/robe.JPG',
-    badge: 'New Arrival',
-  },
-  {
-    id: '3',
-    name: 'Modern Jacket',
-    price: 3800,
-    originalPrice: 5000,
-    rating: 4.7,
-    reviews: 52,
-    image: '/assets/jacket.JPG',
-  },
-  {
-    id: '4',
-    name: 'Premium Hijeb',
-    price: 2900,
-    rating: 4.8,
-    reviews: 38,
-    image: '/assets/hijeb.jpg',
-    badge: 'New Arrival',
-  },
-];
-
 interface FeaturedProductsSectionProps {
   onViewProduct?: (productId: string) => void;
   onViewAllProducts?: () => void;
@@ -63,6 +24,34 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
   onViewProduct,
   onViewAllProducts,
 }) => {
+  const { products: apiProducts, isLoading } = useProducts();
+
+  const featuredItems = useMemo(() => {
+    if (!apiProducts) return [];
+
+    // For now, treat the first 4 products as featured
+    return apiProducts.slice(0, 4).map(p => ({
+      id: p.id,
+      name: p.name,
+      price: p.price,
+      originalPrice: p.originalPrice,
+      rating: p.rating || 5,
+      reviews: (p as any).reviewCount || Math.floor(Math.random() * 100) + 10,
+      image: p.image,
+      badge: p.discount ? `${p.discount}% OFF` : undefined
+    }));
+  }, [apiProducts]);
+
+  if (isLoading && featuredItems.length === 0) {
+    return (
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-neutral-500">Loading featured pieces...</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <section className="py-16 sm:py-20 lg:py-24 bg-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -87,7 +76,7 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
 
         {/* Products Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product) => (
+          {featuredItems.map((product) => (
             <div
               key={product.id}
               onClick={() => onViewProduct?.(product.id)}

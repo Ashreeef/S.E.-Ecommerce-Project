@@ -3,10 +3,11 @@ import { Trash2 } from "lucide-react";
 import Image from "next/image";
 
 interface CartItemData {
-  id: number;
+  id: string | number;
   name: string;
   image: string;
   price: number;
+  originalPrice?: number;
   size: string;
   color: string;
   quantity: number;
@@ -14,8 +15,8 @@ interface CartItemData {
 
 interface CartItemProps {
   item: CartItemData;
-  removeItem: (id: number) => void;
-  updateQuantity: (id: number, quantity: number) => void;
+  removeItem: (id: string | number) => void;
+  updateQuantity: (id: string | number, quantity: number) => void;
 }
 
 export default function CartItem({ item, removeItem, updateQuantity }: CartItemProps) {

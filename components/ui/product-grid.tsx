@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { ProductCard } from './product-card';
-import { Product } from '@/lib/mock-data';
+import { Product } from '@/lib/types/product';
 import { cn } from '@/lib/utils';
 
 interface ProductGridProps {
@@ -13,12 +13,12 @@ interface ProductGridProps {
     className?: string;
 }
 
-export function ProductGrid({ 
-    products, 
+export function ProductGrid({
+    products,
     favoriteIds = [],
     onFavoriteToggle,
     onAddToCart,
-    className 
+    className
 }: ProductGridProps) {
     if (products.length === 0) {
         return (
