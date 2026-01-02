@@ -7,27 +7,31 @@ import { Order } from '@/lib/types/orders';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { CustomButton } from '@/components/ui/custom-button';
 import { Input } from '@/components/ui';
-import { useOrder } from '@/hooks/useOrders';
 import { Download } from 'lucide-react';
 import '@/styles/order-details.css';
 
 interface OrderFormProps {
   order: Order;
+  onStatusUpdate?: (orderId: string, status: string) => Promise<{ success: boolean; error?: string }>;
 }
 
-export default function OrderForm({ order }: OrderFormProps) {
+export default function OrderForm({ order, onStatusUpdate }: OrderFormProps) {
   const router = useRouter();
-  const { updateStatus, isLoading: orderLoading } = useOrder(order.id);
   const [selectedStatus, setSelectedStatus] = useState<Order['status']>(order.status);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSave = async () => {
-    if (!order.id) return;
-    const res = await updateStatus(order.id, selectedStatus);
-    if (res && (res as any).success) {
+    if (!order.id || !onStatusUpdate) return;
+    
+    setIsLoading(true);
+    const res = await onStatusUpdate(order.id, selectedStatus);
+    setIsLoading(false);
+    
+    if (res && res.success) {
       alert('Order status saved');
       try { router.refresh(); } catch (e) { }
     } else {
-      alert('Failed to save order status');
+      alert(`Failed to save order status: ${res?.error || 'Unknown error'}`);
     }
   };
 
@@ -61,8 +65,8 @@ export default function OrderForm({ order }: OrderFormProps) {
             <CustomButton
               text="Save"
               onClick={handleSave}
-              loading={orderLoading}
-              disabled={orderLoading}
+              loading={isLoading}
+              disabled={isLoading || !onStatusUpdate}
             />
           </div>
         </div>

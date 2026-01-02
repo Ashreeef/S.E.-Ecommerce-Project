@@ -25,9 +25,22 @@ export default function CheckoutPage() {
 
   const shippingCost = calculateShippingCost(formData.shippingMethod);
   const total = calculateTotal(formData.shippingMethod);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleSubmit = () => {
-    submitForm(cartItems, total);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    const result = await submitForm(cartItems, total);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      alert('تم تأكيد الطلب بنجاح! / Order confirmed successfully!');
+      // Clear cart after successful order
+      cartItems.forEach(item => removeItem(item.id));
+      router.push('/');
+    } else {
+      // Error is already set in the form
+      alert(`فشل إنشاء الطلب / Failed to create order: ${result.error}`);
+    }
   };
 
   return (
@@ -91,9 +104,10 @@ export default function CheckoutPage() {
             {/* Submit Button */}
             <CustomButton
               variant="filled"
-              text="Confirm Purchase"
+              text={isSubmitting ? "Processing..." : "Confirm Purchase"}
               className="w-full py-3 text-base sm:text-lg font-semibold"
               onClick={handleSubmit}
+              disabled={isSubmitting}
             />
           </div>
         </section>

@@ -194,6 +194,15 @@ const NavBar: React.FC<NavBarProps> = ({
                         </p>
                       </div>
                       <button
+                        onClick={() => {
+                          router.push('/orders');
+                          setUserMenuOpen(false);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100"
+                      >
+                        My Orders
+                      </button>
+                      <button
                         onClick={async () => {
                           await logout();
                           setUserMenuOpen(false);
@@ -375,6 +384,15 @@ const NavBar: React.FC<NavBarProps> = ({
                       </p>
                     </div>
                   </div>
+                  <button
+                    onClick={() => {
+                      router.push('/orders');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full px-4 py-2 mb-2 bg-white border border-slate-300 text-slate-700 hover:bg-slate-100 rounded-md text-sm font-medium"
+                  >
+                    My Orders
+                  </button>
                   <button
                     onClick={async () => {
                       await logout();

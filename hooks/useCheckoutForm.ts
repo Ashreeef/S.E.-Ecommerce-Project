@@ -88,25 +88,64 @@ export const useCheckoutForm = () => {
     setError('');
   };
 
-  const submitForm = (cartItems: CartItem[], total: number) => {
+  const submitForm = async (cartItems: CartItem[], total: number) => {
     const validation = validateForm();
 
     if (!validation.isValid) {
       setError(validation.error);
-      return false;
+      return { success: false, error: validation.error };
     }
+
+    // Prepare order items
+    const items = cartItems.map(item => ({
+      product_id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity,
+      color: item.color,
+      size: item.size,
+      image: item.image,
+    }));
 
     const orderData = {
       ...formData,
-      items: cartItems,
+      items,
       total,
     };
 
-    console.log('Order submitted:', orderData);
-    alert('تم تأكيد الطلب بنجاح! / Order confirmed successfully!');
+    try {
+      // Get auth token from Supabase
+      const { supabase } = await import('@/lib/supabaseClient');
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || '';
 
-    resetForm();
-    return true;
+      if (!token) {
+        throw new Error('Please login to place an order');
+      }
+
+      const response = await fetch('/api/orders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to create order');
+      }
+
+      console.log('Order submitted:', result.data);
+      resetForm();
+      return { success: true, data: result.data };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Failed to submit order';
+      setError(errorMessage);
+      return { success: false, error: errorMessage };
+    }
   };
 
   return {

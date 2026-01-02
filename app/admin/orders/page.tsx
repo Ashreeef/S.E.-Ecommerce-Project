@@ -5,34 +5,43 @@ import { useRouter } from 'next/navigation';
 import { CustomButton } from '@/components/ui/custom-button';
 import { Input } from '@/components/ui/input';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { ArrowUpDown, Filter, Download, Pencil, Trash2, ChevronLeft, ChevronRight, ChevronDown, ChevronUp } from 'lucide-react';
 import '@/styles/admin-dashboard.css';
 import '@/styles/orders-list.css';
-import { orders } from '@/lib/types/orders';
-import { Order } from '@/lib/types/orders';
 import DeleteProductModal from '@/features/admin/components/DeleteProductModal';
-
-// Use orders imported from `lib/types/orders.ts` as the mock list
-const mockOrders: Order[] = orders;
+import { useAdminOrders } from '@/hooks/useAdminOrders';
 
 export default function OrdersPage() {
   const router = useRouter();
+  const { orders, isLoading, error, refetch, deleteOrder } = useAdminOrders();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedOrders, setSelectedOrders] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-  const [productToDelete, setProductToDelete] = useState<string | null>(null);
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const ordersPerPage = 10;
-  const totalPages = Math.ceil(mockOrders.length / ordersPerPage);
   const [expandedRows, setExpandedRows] = useState<string[]>([]);
 
   const toggleRow = (id: string) => {
     setExpandedRows(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
 
+  const filteredOrders = orders.filter(order =>
+    order.customer_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    order.id.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
+
+  const paginatedOrders = filteredOrders.slice(
+    (currentPage - 1) * ordersPerPage,
+    currentPage * ordersPerPage
+  );
+
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedOrders(mockOrders.map(o => o.id));
+      setSelectedOrders(paginatedOrders.map(o => o.id));
     } else {
       setSelectedOrders([]);
     }
@@ -47,25 +56,26 @@ export default function OrdersPage() {
   };
 
   const handleEdit = (orderId: string) => {
-    // encode order id (e.g. '#CRO00221') so the hash doesn't break the path
-    const safeId = encodeURIComponent(orderId);
-    router.push(`/admin/orders/${safeId}`);
+    router.push(`/admin/orders/${orderId}`);
   };
 
   const handleDelete = (orderId: string) => {
-    setProductToDelete(orderId);
+    setOrderToDelete(orderId);
     setDeleteModalOpen(true);
   };
 
-  const filteredOrders = mockOrders.filter(order =>
-    order.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    order.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const paginatedOrders = filteredOrders.slice(
-    (currentPage - 1) * ordersPerPage,
-    currentPage * ordersPerPage
-  );
+  const handleDeleteConfirm = async () => {
+    if (!orderToDelete) return;
+    
+    const result = await deleteOrder(orderToDelete);
+    if (result.success) {
+      setDeleteModalOpen(false);
+      setOrderToDelete(null);
+      alert('Order deleted successfully');
+    } else {
+      alert(`Failed to delete order: ${result.error}`);
+    }
+  };
 
   // Map OrderStatus to BadgeState
   const mapStatusToBadge = (status: string): 'delivered' | 'confirmed' | 'returned' | 'cancelled' | 'pending' | 'sent' => {
@@ -74,11 +84,40 @@ export default function OrdersPage() {
       'Confirmed': 'confirmed',
       'Returned': 'returned',
       'Canceled': 'cancelled',
+      'Cancelled': 'cancelled',
       'Pending': 'pending',
       'Sent': 'sent',
     };
     return statusMap[status] || 'pending';
   };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
+
+  if (isLoading) {
+    return <LoadingSpinner fullScreen text="Loading orders..." />;
+  }
+
+  if (error) {
+    return (
+      <div className="page-container">
+        <div className="text-center py-8">
+          <p className="text-red-600 mb-4">{error}</p>
+          <CustomButton
+            text="Retry"
+            onClick={() => refetch()}
+            variant="outlined"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-container orders-list-container">
@@ -135,7 +174,7 @@ export default function OrdersPage() {
             <div key={order.id} className="mobile-order-card border rounded mb-3 p-3 bg-white">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="font-medium">{order.customerName}</div>
+                  <div className="font-medium">{order.customer_name}</div>
                   <div className="text-xs text-neutral-400">{order.id}</div>
                 </div>
                 <button
@@ -150,9 +189,9 @@ export default function OrdersPage() {
               {expandedRows.includes(order.id) && (
                 <div className="mobile-order-details mt-3 text-sm text-neutral-600">
                   <div className="grid grid-cols-2 gap-2">
-                    <div><strong>Date</strong>: {order.datePurchased}</div>
-                    <div><strong>Total</strong>: {order.grandTotal.toFixed(2)} DZD</div>
-                    <div><strong>Items</strong>: {order.numberOfProducts}</div>
+                    <div><strong>Date</strong>: {formatDate(order.created_at)}</div>
+                    <div><strong>Total</strong>: {order.grand_total.toFixed(2)} DZD</div>
+                    <div><strong>Items</strong>: {order.number_of_products}</div>
                     <div><strong>Address</strong>: {order.address}</div>
                     <div className="col-span-2">
                       <StatusBadge state={mapStatusToBadge(order.status)} />
@@ -215,10 +254,10 @@ export default function OrdersPage() {
                       <span className="orders-id">{order.id}</span>
                     </div>
                   </td>
-                  <td className="orders-table-cell">{order.customerName}</td>
-                  <td className="orders-table-cell">{order.datePurchased}</td>
-                  <td className="orders-table-cell">{order.grandTotal.toFixed(2)} DZD</td>
-                  <td className="orders-table-cell">{order.numberOfProducts}</td>
+                  <td className="orders-table-cell">{order.customer_name}</td>
+                  <td className="orders-table-cell">{formatDate(order.created_at)}</td>
+                  <td className="orders-table-cell">{order.grand_total.toFixed(2)} DZD</td>
+                  <td className="orders-table-cell">{order.number_of_products}</td>
                   <td className="orders-table-cell">{order.address}</td>
                   <td className="orders-table-cell">
                     <StatusBadge state={mapStatusToBadge(order.status)} />
@@ -291,20 +330,16 @@ export default function OrdersPage() {
         </button>
       </div>
       {/* Delete Confirmation Modal */}
-      {productToDelete && (
+      {orderToDelete && (
         <DeleteProductModal
           isOpen={deleteModalOpen}
-          resourceId={productToDelete}
+          resourceId={orderToDelete}
           resourceType="order"
           onClose={() => {
             setDeleteModalOpen(false);
-            setProductToDelete(null);
+            setOrderToDelete(null);
           }}
-          onSuccess={() => {
-            setDeleteModalOpen(false);
-            setProductToDelete(null);
-            alert('Order deleted successfully');
-          }}
+          onSuccess={handleDeleteConfirm}
         />
       )}
     </div>

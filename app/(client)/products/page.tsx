@@ -6,13 +6,16 @@ import { ProductsToolbar } from '@/components/ui/products-toolbar';
 import { NavigationButtons } from '@/components/ui/navigation-buttons';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useCart } from '@/hooks/useCart';
 import { useProducts, Product as ApiProduct } from '@/hooks/useProductsApi';
 import { SortOption } from '@/components/ui/sort-control';
+
 export default function ProductsPage() {
     const [sortOption, setSortOption] = useState<SortOption>('default');
     const [currentPage, setCurrentPage] = useState(1);
     const productsPerPage = 12;
     const { favorites, toggleFavorite } = useFavorites();
+    const { addItem } = useCart();
     const { data, isLoading, isError } = useProducts();
 
     // Transform API data to match component format
@@ -69,6 +72,28 @@ export default function ProductsPage() {
         return sortedProducts.slice(startIndex, startIndex + productsPerPage);
     }, [sortedProducts, currentPage]);
 
+    const handleAddToCart = (productId: string) => {
+        const product = products.find((p: { id: string }) => p.id === productId);
+        if (!product) return;
+
+        // For quick add from grid, use default size and color
+        const defaultSize = product.availableSizes?.[0] || 'M';
+        const defaultColor = product.availableColors?.[0]?.name || 'Black';
+
+        addItem({
+            productId: product.id,
+            name: product.title,
+            size: defaultSize,
+            color: defaultColor,
+            price: product.price,
+            originalPrice: product.originalPrice,
+            quantity: 1,
+            image: product.image,
+        });
+
+        alert('Product added to cart!');
+    };
+
     if (isLoading) {
         return <LoadingSpinner fullScreen text="Loading products..." />;
     }
@@ -93,6 +118,7 @@ export default function ProductsPage() {
                 products={paginatedProducts}
                 favoriteIds={favorites}
                 onFavoriteToggle={toggleFavorite}
+                onAddToCart={handleAddToCart}
             />
 
             {totalPages > 1 && (

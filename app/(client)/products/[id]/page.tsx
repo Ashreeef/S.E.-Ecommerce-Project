@@ -7,6 +7,7 @@ import { ProductDetailsView } from '@/components/ui/product-details-view';
 import { ProductGrid } from '@/components/ui/product-grid';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { useFavorites } from '@/hooks/useFavorites';
+import { useCart } from '@/hooks/useCart';
 import { useProduct, useProducts, Product as ApiProduct } from '@/hooks/useProductsApi';
 import { mapColorsToHex } from '@/lib/color-utils';
 
@@ -15,6 +16,7 @@ export default function ProductDetailPage() {
   const router = useRouter();
   const productId = params.id as string;
   const { favorites, toggleFavorite } = useFavorites();
+  const { addItem } = useCart();
   
   // Fetch single product
   const { data: productData, isLoading, isError } = useProduct(productId);
@@ -90,8 +92,43 @@ export default function ProductDetailPage() {
       }));
   }, [allProductsData, productId]);
 
-  const handleAddToCart = (_options: { size: string; color: string; quantity: number }) => {
-    // TODO: Implement add to cart functionality
+  const handleAddToCart = (options: { size: string; color: string; quantity: number }) => {
+    if (!product) return;
+
+    addItem({
+      productId: product.id,
+      name: product.name,
+      size: options.size,
+      color: options.color,
+      price: product.price,
+      originalPrice: product.originalPrice,
+      quantity: options.quantity,
+      image: product.images[0]?.url || '',
+    });
+
+    alert('Product added to cart!');
+  };
+
+  const handleRelatedProductAddToCart = (relatedProductId: string) => {
+    const relatedProduct = relatedProducts.find((p: { id: string }) => p.id === relatedProductId);
+    if (!relatedProduct) return;
+
+    // For quick add from grid, use default size and color
+    const defaultSize = relatedProduct.availableSizes?.[0] || 'M';
+    const defaultColor = relatedProduct.availableColors?.[0]?.name || 'Black';
+
+    addItem({
+      productId: relatedProduct.id,
+      name: relatedProduct.title,
+      size: defaultSize,
+      color: defaultColor,
+      price: relatedProduct.price,
+      originalPrice: relatedProduct.originalPrice,
+      quantity: 1,
+      image: relatedProduct.image,
+    });
+
+    alert('Product added to cart!');
   };
 
   if (isLoading) {
@@ -141,7 +178,7 @@ export default function ProductDetailPage() {
           products={relatedProducts}
           favoriteIds={favorites}
           onFavoriteToggle={toggleFavorite}
-          onAddToCart={() => {}}
+          onAddToCart={handleRelatedProductAddToCart}
         />
       </section>
     </div>
