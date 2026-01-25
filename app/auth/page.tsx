@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import CustomButton from "@/components/ui/custom-button";
 import { Lock, Mail, AlertCircle, ShoppingBag, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabase";
+import { useRedirectIfAuthenticated } from "@/hooks/useAuth";
 
 type AuthView = 'login' | 'forgot';
 
@@ -14,6 +16,7 @@ import { useToast } from "@/context/ToastContext";
 export default function AuthPage() {
     const router = useRouter();
     const { showToast } = useToast();
+    const { isLoading: authLoading, isAuthenticated, login } = useRedirectIfAuthenticated();
     const [view, setView] = useState<AuthView>('login');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -65,11 +68,34 @@ export default function AuthPage() {
         setError(null);
 
         try {
-            console.log("Login attempt:", loginData);
-            await new Promise((resolve) => setTimeout(resolve, 1500));
-            console.log("Login successful");
-            showToast("Login successful!", "success");
-            router.push("/admin");
+            // Authenticate with Supabase
+            const { data, error: authError } = await supabase.auth.signInWithPassword({
+                email: loginData.email,
+                password: loginData.password,
+            });
+
+            if (authError) {
+                setError(authError.message || "Invalid credentials. Please try again.");
+                return;
+            }
+
+            if (data.session && data.user) {
+                // Store the session token and user info
+                const userData = {
+                    id: data.user.id,
+                    email: data.user.email || loginData.email,
+                    name: data.user.user_metadata?.name || 'Admin User',
+                    role: 'admin'
+                };
+                
+                login(data.session.access_token, userData);
+                
+                console.log("Login successful");
+                showToast("Login successful!", "success");
+                router.push("/admin");
+            } else {
+                setError("Login failed. Please try again.");
+            }
         } catch {
             setError("Invalid credentials. Please try again.");
         } finally {
@@ -93,8 +119,15 @@ export default function AuthPage() {
         setError(null);
 
         try {
-            console.log("Forgot password attempt:", forgotEmail);
-            await new Promise((resolve) => setTimeout(resolve, 1500));
+            const { error: resetError } = await supabase.auth.resetPasswordForEmail(forgotEmail, {
+                redirectTo: `${window.location.origin}/auth/reset-password`,
+            });
+            
+            if (resetError) {
+                setError(resetError.message || "An error occurred. Please try again.");
+                return;
+            }
+            
             setSuccess("If an account exists, a reset link has been sent.");
         } catch {
             setError("An error occurred. Please try again.");
@@ -102,6 +135,30 @@ export default function AuthPage() {
             setLoading(false);
         }
     };
+
+    // Show loading state while checking authentication
+    if (authLoading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+                <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-neutral-600">Loading...</p>
+                </div>
+            </div>
+        );
+    }
+
+    // If already authenticated, show redirect message (hook handles actual redirect)
+    if (isAuthenticated) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-neutral-50">
+                <div className="text-center">
+                    <div className="w-12 h-12 border-4 border-neutral-200 border-t-neutral-900 rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-neutral-600">Already authenticated. Redirecting...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center bg-neutral-50 px-4 py-8 sm:px-6 lg:px-8 font-tajawal relative overflow-hidden">
